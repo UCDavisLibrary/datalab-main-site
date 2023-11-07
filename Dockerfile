@@ -43,6 +43,9 @@ ENV WP_UPLOADS_DIR=${WP_UPLOADS_DIR}
 ARG WP_THEME_DIR
 ARG WP_PLUGIN_DIR
 ARG THEME_TAG
+ARG THEME_REPO_URL
+ARG FORMS_STYLES_REPO_URL
+ARG FORMS_STYLES_VERSION
 
 WORKDIR $WP_SRC_ROOT
 
@@ -74,10 +77,7 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 # get our prebuilt theme
 WORKDIR $WP_THEME_DIR
 RUN rm -rf */
-ARG THEME_FILE="ucdlib-theme-wp-${THEME_TAG}.tar.gz"
-RUN curl -OL https://github.com/UCDavisLibrary/ucdlib-theme-wp/releases/download/${THEME_TAG}/${THEME_FILE} \
-&& tar -xzf ${THEME_FILE} \
-&& rm ${THEME_FILE}
+RUN git clone -b ${THEME_TAG} ${THEME_REPO_URL}
 
 # remove default plugins and insert the plugins we downloaded from GCS
 ARG OPENID_CONNECT_GENERIC_DIR
@@ -94,6 +94,9 @@ RUN unzip ${OPENID_CONNECT_GENERIC_ZIP_FILE} && rm ${OPENID_CONNECT_GENERIC_ZIP_
 && unzip ${SMTP_MAILER_ZIP_FILE} && rm ${SMTP_MAILER_ZIP_FILE} \
 && unzip ${REDIRECTION_ZIP_FILE} && rm ${REDIRECTION_ZIP_FILE}
 RUN mv $OPENID_CONNECT_GENERIC_DIR openid-connect-generic
+
+# Get plugins from github
+RUN git clone -b ${FORMS_STYLES_VERSION} ${FORMS_STYLES_REPO_URL}
 
 # Copy our custom plugins
 COPY src/plugins/ucdlib-oidc ucdlib-oidc

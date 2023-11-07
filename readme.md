@@ -8,11 +8,12 @@ To get the app up and running on your machine:
 
 1. `cd deploy`
 2. Make sure `GC_READER_KEY_SECRET` has read access to `GC_BUCKET_PLUGINS`, and that you have access to view the secret.
-3. `./cmds/init-local-dev.sh`
-4. `./cmds/build-local-dev.sh`
-5. `./cmds/generate-deployment-files.sh`
-6. A directory called `$APP_SLUG-local-dev` will have been created.
-7. Enter it, and run `docker compose up`
+3. In the parent directory of this repository, clone all repositories listed in `DEV_REPOS`. These are only needed while doing local development.
+4. `./cmds/init-local-dev.sh`
+5. `./cmds/build-local-dev.sh`
+6. `./cmds/generate-deployment-files.sh`
+7. A directory called `datalab-main-site-local-dev` will have been created.
+8. Enter it, and run `docker compose up`
 
 If you are using the init/backup utilities, you will need make sure that you have access to the service account secrets. `gc-reader-key.json` and `gc-writer-key.json` should have content for the init and backup containers, respectively. Keys are fetced in `init-local-dev`, but they also have their own dedicated scripts.
 

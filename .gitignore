@@ -3,4 +3,5 @@ node_modules
 .DS_Store
 gc-writer-key.json
 gc-reader-key.json
-simple-wp-local-dev
+datalab-main-site-local-dev
+repositories

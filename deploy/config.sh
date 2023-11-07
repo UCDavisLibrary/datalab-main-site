@@ -29,11 +29,13 @@ WP_CORE_VERSION='6.3.2'
 MYSQL_TAG=5.7
 ADMINER_TAG=4
 
-# Plugin versions (downloaded from Google Cloud Storage, so make sure they exist there. See Google Cloud section below)
-# and don't forget to add them as build arg in cmds/build.sh and the dockerfile.
+# Plugin versions from Google Cloud Storage
 OPENID_CONNECT_GENERIC_VERSION='3.9.1'
 REDIRECTION_VERSION='5.3.10'
 SMTP_MAILER_VERSION='1.1.9'
+
+# Plugin versions from github
+FORMS_STYLES_VERSION='v1.1.0'
 
 # Auth Defaults ( can also be overriden in .env file )
 OIDC_PROVIDER_URL='https://sandbox.auth.library.ucdavis.edu/realms/internal'
@@ -62,6 +64,10 @@ GITHUB_ORG_URL=https://github.com/UCDavisLibrary
 # theme
 THEME_REPO_NAME=ucdlib-theme-wp
 THEME_REPO_URL=$GITHUB_ORG_URL/$THEME_REPO_NAME
+
+# form styles plugin
+FORMS_STYLES_REPO_NAME=forminator-theme-styles
+FORMS_STYLES_REPO_URL=$GITHUB_ORG_URL/$FORMS_STYLES_REPO_NAME
 
 # local development repository dependencies
 DEV_REPOS=(
