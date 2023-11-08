@@ -16,3 +16,4 @@ touch ./gc-reader-key.json
 ./cmds/get-reader-key.sh
 ./cmds/get-writer-key.sh
 ./cmds/link-dev-repos.sh
+./cmds/install-private-packages.sh

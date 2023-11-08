@@ -24,10 +24,11 @@ APP_VERSION=v0.0.9.${BUILD_NUM}
 REPO_TAG=sandbox
 
 # Dependency tags/branches
-THEME_TAG='v3.5.1'
+THEME_TAG='v3.6.0'
 WP_CORE_VERSION='6.3.2'
 MYSQL_TAG=5.7
 ADMINER_TAG=4
+NODE_VERSION=20
 
 # Plugin versions from Google Cloud Storage
 OPENID_CONNECT_GENERIC_VERSION='3.9.1'
@@ -131,6 +132,16 @@ WP_THEME_DIR=$WP_SRC_ROOT/wp-content/themes
 WP_UCD_THEME_DIR=$WP_THEME_DIR/$THEME_REPO_NAME
 WP_PLUGIN_DIR=$WP_SRC_ROOT/wp-content/plugins
 WP_UPLOADS_DIR=$WP_SRC_ROOT/wp-content/uploads
+
+# NPM
+NPM=npm
+NPM_PRIVATE_PACKAGES=(
+  $REPOSITORY_DIR/$THEME_REPO_NAME/src/public
+  $SRC_DIR/plugins/ucdlib-datalab/assets/public
+)
+JS_BUNDLES=(
+  $SRC_DIR/plugins/ucdlib-datalab/assets/public
+)
 
 # Google Cloud
 # Used for init/backup scripts and for installing plugins in Docker image

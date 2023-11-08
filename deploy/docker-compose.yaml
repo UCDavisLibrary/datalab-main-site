@@ -1,7 +1,7 @@
 version: '3'
 services:
   wordpress:
-    image: gcr.io/digital-ucdavis-edu/simple-wp:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site:sandbox
     env_file:
       - .env
     ports:
@@ -13,7 +13,7 @@ services:
         define('WP_SITEURL', '${SERVER_URL}' );
         define('WP_HOME', '${SERVER_URL}' );
         define('FORCE_SSL_ADMIN', true);
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-simple-wp}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-datalab-main-site}
       OIDC_ENDPOINT_LOGIN_URL: ${OIDC_ENDPOINT_LOGIN_URL:-https://sandbox.auth.library.ucdavis.edu/realms/internal/protocol/openid-connect/auth}
       OIDC_ENDPOINT_USERINFO_URL: ${OIDC_ENDPOINT_USERINFO_URL:-}
       OIDC_ENDPOINT_TOKEN_URL: ${OIDC_ENDPOINT_TOKEN_URL:-https://sandbox.auth.library.ucdavis.edu/realms/internal/protocol/openid-connect/token}
@@ -32,11 +32,11 @@ services:
       - wp-logs-data:/var/log/wordpress
 
   init:
-    image: gcr.io/digital-ucdavis-edu/simple-wp-utils:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
     env_file:
       - .env
     environment:
-      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-itis-backups/simple-wp}
+      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-datalab-main-site-content}
       GC_PROJECT: ${GC_PROJECT:-digital-ucdavis-edu}
       BACKUP_FILE_NAME: ${BACKUP_FILE_NAME:-db.sql.gz}
       UPLOADS_FILE_NAME: ${UPLOADS_FILE_NAME:-uploads.tar.gz}
@@ -50,11 +50,11 @@ services:
     command: ./init/init.sh
 
   backup:
-    image: gcr.io/digital-ucdavis-edu/simple-wp-utils:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
     env_file:
       - .env
     environment:
-      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-itis-backups/simple-wp}
+      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-datalab-main-site-content}
       BACKUP_FILE_NAME: ${BACKUP_FILE_NAME:-db.sql.gz}
       UPLOADS_FILE_NAME: ${UPLOADS_FILE_NAME:-uploads.tar.gz}
       WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}

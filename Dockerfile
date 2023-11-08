@@ -42,10 +42,7 @@ ARG WP_UPLOADS_DIR
 ENV WP_UPLOADS_DIR=${WP_UPLOADS_DIR}
 ARG WP_THEME_DIR
 ARG WP_PLUGIN_DIR
-ARG THEME_TAG
-ARG THEME_REPO_URL
-ARG FORMS_STYLES_REPO_URL
-ARG FORMS_STYLES_VERSION
+ARG GITHUB_ORG_URL
 
 WORKDIR $WP_SRC_ROOT
 
@@ -55,8 +52,16 @@ ENV COMPOSER_ALLOW_SUPERUSER=1;
 COPY composer.json .
 RUN composer install
 
+# node setup
+ARG NODE_VERSION
+RUN apt-get update \
+&& apt-get install -y ca-certificates curl gnupg \
+&& mkdir -p /etc/apt/keyrings \
+&& curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+&& echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
 # Install debian packages
-RUN apt-get update && apt-get install -y unzip git vim
+RUN apt-get update && apt-get install -y unzip git vim nodejs
 
 # WP config
 COPY wp-config-docker.php wp-config-docker.php
@@ -75,9 +80,14 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 && mv wp-cli.phar /usr/local/bin/wp
 
 # get our prebuilt theme
+ARG THEME_TAG
+ARG THEME_REPO_NAME
 WORKDIR $WP_THEME_DIR
 RUN rm -rf */
-RUN git clone -b ${THEME_TAG} ${THEME_REPO_URL}
+RUN git clone -b ${THEME_TAG} ${GITHUB_ORG_URL}/${THEME_REPO_NAME} \
+&& cd ${THEME_REPO_NAME}/src/public \
+&& npm install --only=prod && npm link \
+&& cd $WP_THEME_DIR/${THEME_REPO_NAME}/src/editor && npm link
 
 # remove default plugins and insert the plugins we downloaded from GCS
 ARG OPENID_CONNECT_GENERIC_DIR
@@ -96,10 +106,21 @@ RUN unzip ${OPENID_CONNECT_GENERIC_ZIP_FILE} && rm ${OPENID_CONNECT_GENERIC_ZIP_
 RUN mv $OPENID_CONNECT_GENERIC_DIR openid-connect-generic
 
 # Get plugins from github
-RUN git clone -b ${FORMS_STYLES_VERSION} ${FORMS_STYLES_REPO_URL}
+ARG FORMS_STYLES_REPO_NAME
+ARG FORMS_STYLES_VERSION
+RUN git clone -b ${FORMS_STYLES_VERSION} ${GITHUB_ORG_URL}/${FORMS_STYLES_REPO_NAME}
 
 # Copy our custom plugins
 COPY src/plugins/ucdlib-oidc ucdlib-oidc
+COPY src/plugins/ucdlib-datalab ucdlib-datalab
+
+# asset build
+RUN cd ucdlib-datalab/assets/public \
+&& npm install \
+&& npm link @ucd-lib/brand-theme \
+&& npm run dist \
+&& rm -rf node_modules \
+&& rm -rf ${THEME_REPO_NAME}/src/public/node_modules
 
 # Back to site root so wordpress can do the rest of its thing
 WORKDIR $WP_SRC_ROOT

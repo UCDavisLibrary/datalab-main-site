@@ -19,14 +19,15 @@ fi
 docker build \
   -t $APP_IMAGE_NAME_TAG \
   --cache-from=$APP_IMAGE_NAME:$CONTAINER_CACHE_TAG \
+  --build-arg GITHUB_ORG_URL=${GITHUB_ORG_URL} \
   --build-arg GC_BUCKET_PLUGINS=${GC_BUCKET_PLUGINS} \
   --build-arg OPENID_CONNECT_GENERIC_VERSION=${OPENID_CONNECT_GENERIC_VERSION} \
   --build-arg REDIRECTION_VERSION=${REDIRECTION_VERSION} \
   --build-arg SMTP_MAILER_VERSION=${SMTP_MAILER_VERSION} \
   --build-arg FORMS_STYLES_VERSION=${FORMS_STYLES_VERSION} \
-  --build-arg FORMS_STYLES_REPO_URL=${FORMS_STYLES_REPO_URL} \
+  --build-arg FORMS_STYLES_REPO_NAME=${FORMS_STYLES_REPO_NAME} \
   --build-arg THEME_TAG=${THEME_TAG} \
-  --build-arg THEME_REPO_URL=${THEME_REPO_URL} \
+  --build-arg THEME_REPO_NAME=${THEME_REPO_NAME} \
   --build-arg WP_CORE_VERSION=${WP_CORE_VERSION} \
   --build-arg WP_SRC_ROOT=${WP_SRC_ROOT} \
   --build-arg WP_LOG_ROOT=${WP_LOG_ROOT} \
@@ -34,6 +35,7 @@ docker build \
   --build-arg WP_THEME_DIR=${WP_THEME_DIR} \
   --build-arg WP_PLUGIN_DIR=${WP_PLUGIN_DIR} \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
+  --build-arg NODE_VERSION=${NODE_VERSION} \
   --build-arg BUILD_NUM=${BUILD_NUM} \
   --build-arg BUILD_TIME=${BUILD_TIME} \
   --build-arg APP_VERSION=${APP_VERSION} \
