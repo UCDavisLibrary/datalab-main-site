@@ -1,0 +1,20 @@
+{
+  "name": "ucdlib-datalab-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ucdlib-datalab-editor.js",
+  "scripts": {
+    "watch": "wp-scripts start ucdlib-datalab-editor.js --output-path=../assets/js/editor-dev",
+    "create-dev-bundle": "wp-scripts build ucdlib-datalab-editor.js --output-path=../assets/js/editor-dev",
+    "dist": "wp-scripts build ucdlib-datalab-editor.js --output-path=../assets/js/editor-dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "@ucd-lib/brand-theme-editor": "file:../../../../../repositories/ucdlib-theme-wp/src/editor"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^23.7.2"
+  }
+}
