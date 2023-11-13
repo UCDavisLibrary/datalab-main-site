@@ -41,6 +41,8 @@ class UcdlibDatalabAssets {
     $this->jsEditorUrlDist = $this->jsUrl . '/editor-dist/' . $this->jsEditorScript;
     $this->jsEditorPathDist = $this->jsPath . '/editor-dist/' . $this->jsEditorScript;
 
+    $this->imgUrl = $this->assetsUrl . '/images';
+
   }
 
   // sets hooks and filters
@@ -52,6 +54,15 @@ class UcdlibDatalabAssets {
       wp_deregister_script('ucd-components');
     }, 1000);
     add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorScripts'], 3);
+    add_filter('ucd-theme/site/block-settings', [$this, 'modifyDefaultPostImgUrl'], 10, 1);
+  }
+
+  /**
+   * Change where page cards/blocks look for their default image
+   */
+  public function modifyDefaultPostImgUrl($settings){
+    $settings['imgBase'] = $this->imgUrl . '/block-defaults/';
+    return $settings;
   }
 
   /**
