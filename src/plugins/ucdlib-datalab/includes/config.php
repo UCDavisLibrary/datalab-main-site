@@ -31,12 +31,20 @@ class UcdlibDatalabConfig {
     return $this->getEnv('BUILD_TIME');
   }
 
-  private $pluginDirectory;
-  public function pluginDirectory(){
-    if ( !empty($this->pluginDirectory) ) {
-      return $this->pluginDirectory;
+  /**
+   * Return the plugin's public url with trailing slash
+   * e.g. https://datalab.ucdavis.edu/wp-content/plugins/ucdlib-datalab/
+   */
+  private $pluginUrl;
+  public function pluginUrl(){
+    if ( !empty($this->pluginUrl) ) {
+      return $this->pluginUrl;
     }
-    $this->pluginDirectory = trailingslashit( plugins_url() ) . $this->slug . '/';
-    return $this->pluginDirectory;
+    $this->pluginUrl = trailingslashit( plugins_url() ) . $this->slug . '/';
+    return $this->pluginUrl;
+  }
+
+  public function pluginPath($trailingSlash = true){
+    return WP_PLUGIN_DIR . '/' . $this->slug . ($trailingSlash ? '/' : '');
   }
 }

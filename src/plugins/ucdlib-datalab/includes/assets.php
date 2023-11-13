@@ -7,13 +7,39 @@ class UcdlibDatalabAssets {
   public function __construct( $plugin ){
     $this->plugin = $plugin;
 
-    $this->assetsDir = $this->plugin->config->pluginDirectory() . 'assets/assets';
-    $this->jsDir = $this->assetsDir . '/js';
-    $this->cssDir = $this->assetsDir . '/css';
-    $this->filePrefix = 'ucdlib-datalab';
-    $this->jsScript = $this->filePrefix . '.js';
-
+    $this->setAssetLocations();
     $this->init();
+
+  }
+
+  /**
+   * Sets the file location class properties for the site's js/css assets
+   */
+  private function setAssetLocations(){
+
+    $this->assetsUrl = $this->plugin->config->pluginUrl() . 'assets/assets';
+    $this->assetsPath = $this->plugin->config->pluginPath() . 'assets/assets';
+    $this->filePrefix = 'ucdlib-datalab';
+
+    $this->cssUrl = $this->assetsUrl . '/css';
+    $this->cssPath = $this->assetsPath . '/css';
+    $this->cssUrlDev = $this->cssUrl . '/' . $this->filePrefix . '-dev.css';
+    $this->cssPathDev = $this->cssPath . '/' . $this->filePrefix . '-dev.css';
+    $this->cssUrlDist = $this->cssUrl . '/' . $this->filePrefix . '-min.css';
+    $this->cssPathDist = $this->cssPath . '/' . $this->filePrefix . '-min.css';
+
+    $this->jsUrl = $this->assetsUrl . '/js';
+    $this->jsPath = $this->assetsPath . '/js';
+    $this->jsScript = $this->filePrefix . '.js';
+    $this->jsEditorScript = $this->filePrefix . '-editor.js';
+    $this->jsPublicUrlDev = $this->jsUrl . '/public-dev/' . $this->jsScript;
+    $this->jsPublicPathDev = $this->jsPath . '/public-dev/' . $this->jsScript;
+    $this->jsPublicUrlDist = $this->jsUrl . '/public-dist/' . $this->jsScript;
+    $this->jsPublicPathDist = $this->jsPath . '/public-dist/' . $this->jsScript;
+    $this->jsEditorUrlDev = $this->jsUrl . '/editor-dev/' . $this->jsEditorScript;
+    $this->jsEditorPathDev = $this->jsPath . '/editor-dev/' . $this->jsEditorScript;
+    $this->jsEditorUrlDist = $this->jsUrl . '/editor-dist/' . $this->jsEditorScript;
+    $this->jsEditorPathDist = $this->jsPath . '/editor-dist/' . $this->jsEditorScript;
 
   }
 
@@ -21,6 +47,11 @@ class UcdlibDatalabAssets {
   public function init(){
     $this->removeThemeScripts();
     add_action( 'wp_enqueue_scripts', [$this, 'enqueuePublicScripts'] );
+    add_action( 'after_setup_theme', [$this, 'enqueueEditorCss'] );
+    add_action( 'enqueue_block_editor_assets', function(){
+      wp_deregister_script('ucd-components');
+    }, 1000);
+    add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorScripts'], 3);
   }
 
   /**
@@ -28,12 +59,12 @@ class UcdlibDatalabAssets {
    */
   public function enqueuePublicScripts(){
     $slug = $this->plugin->config->slug;
-    $pluginDir = $this->plugin->config->pluginDirectory();
-    $jsPath = $this->jsDir . '/public-dist/' . $this->jsScript;
-    $cssPath = $this->cssDir . '/' . $this->filePrefix . '-min.css';
+    $pluginDir = $this->plugin->config->pluginUrl();
+    $jsPath = $this->jsPublicUrlDist;
+    $cssPath = $this->cssUrlDist;
     if ( $this->plugin->config->isDevEnv() ){
-      $jsPath = $this->jsDir . '/public-dev/' . $this->jsScript;
-      $cssPath = $this->cssDir . '/' . $this->filePrefix . '-dev.css';
+      $jsPath = $this->jsPublicUrlDev;
+      $cssPath = $this->cssUrlDev;
     }
 
     wp_enqueue_script(
@@ -47,6 +78,49 @@ class UcdlibDatalabAssets {
       $cssPath,
       array(),
       $this->bundleVersion()
+    );
+  }
+
+  /**
+   * Register and load public CSS on the editor
+   */
+  public function enqueueEditorCss(){
+    remove_editor_styles();
+    add_theme_support( 'editor-styles' );
+
+    // path cant be absolute and must be relative to theme root for some reason
+    if ( $this->plugin->config->isDevEnv() ){
+      $path = "../../../plugins" . explode('plugins', $this->cssPathDev)[1];
+      add_editor_style( $path );
+    } else {
+      $path = "../../../plugins" . explode('plugins', $this->cssPathDist)[1];
+      add_editor_style( $path );
+    }
+  }
+
+  /**
+   * Register and load editor JS bundle
+   */
+  public function enqueueEditorScripts(){
+    $adminScreens = array( 'customize');
+    if ( in_array( get_current_screen()->id, $adminScreens ) ) return;
+
+    $slug = $this->filePrefix . '-editor';
+
+    add_filter( 'ucd-theme/assets/editor-settings-slug', function(){
+      return $this->filePrefix . '-editor';
+    } );
+
+    $url = $this->jsEditorUrlDist;
+    if ( $this->plugin->config->isDevEnv() ){
+      $url = $this->jsEditorUrlDev;
+    }
+    wp_enqueue_script(
+      $slug,
+      $url,
+      array(),
+      $this->bundleVersion(),
+      true
     );
   }
 
