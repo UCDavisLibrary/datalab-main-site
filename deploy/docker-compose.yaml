@@ -30,6 +30,8 @@ services:
     volumes:
       - uploads-data:/usr/src/wordpress/wp-content/uploads
       - wp-logs-data:/var/log/wordpress
+      - wphb-logs:/usr/src/wordpress/wp-content/wphb-logs
+      - wphb-cache:/usr/src/wordpress/wp-content/wphb-cache
 
   init:
     image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
@@ -46,6 +48,7 @@ services:
       - wordpress
     volumes:
       - uploads-data:/uploads
+      - wphb-cache:/wphb-cache
       - ./gc-reader-key.json:/etc/service-account.json
     command: ./init/init.sh
 
@@ -63,6 +66,7 @@ services:
       - wordpress
     volumes:
       - uploads-data:/uploads
+      - wphb-cache:/wphb-cache
       - ./gc-writer-key.json:/etc/service-account.json
     command: "./backup/entrypoint.sh"
 
@@ -82,3 +86,5 @@ volumes:
   db-data:
   uploads-data:
   wp-logs-data:
+  wphb-cache:
+  wphb-logs:

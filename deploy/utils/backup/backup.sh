@@ -5,6 +5,7 @@ source /etc/profile
 GOOGLE_APPLICATION_CREDENTIALS=/etc/service-account.json
 DATA_DIR=/deploy-utils/data/backup
 UPLOAD_DIR=/uploads
+WPHB_OPTIONS_FILE=/wphb-cache/wphb-cache.php
 
 if [[ -z $BACKUP_DATA_ENV ]]; then
   echo "BACKUP_DATA_ENV variable is required."
@@ -36,5 +37,9 @@ echo "uploading files to cloud bucket ${GC_BUCKET_BACKUPS}/${BACKUP_DATA_ENV}"
 gcloud auth login --quiet --cred-file=${GOOGLE_APPLICATION_CREDENTIALS}
 gsutil cp $DATA_DIR/$BACKUP_FILE_NAME "gs://${GC_BUCKET_BACKUPS}/${BACKUP_DATA_ENV}/${BACKUP_FILE_NAME}"
 gsutil cp $DATA_DIR/$UPLOADS_FILE_NAME "gs://${GC_BUCKET_BACKUPS}/${BACKUP_DATA_ENV}/${UPLOADS_FILE_NAME}"
+
+if [ -f "$WPHB_OPTIONS_FILE" ]; then
+    gsutil cp $WPHB_OPTIONS_FILE "gs://${GC_BUCKET_BACKUPS}/${BACKUP_DATA_ENV}/wphb-cache.php"
+fi
 
 echo "backup complete"
