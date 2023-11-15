@@ -42,6 +42,7 @@ class UcdlibDatalabAssets {
     $this->jsEditorPathDist = $this->jsPath . '/editor-dist/' . $this->jsEditorScript;
 
     $this->imgUrl = $this->assetsUrl . '/images';
+    $this->fontsUrl = $this->assetsUrl . '/fonts';
 
   }
 
@@ -53,6 +54,7 @@ class UcdlibDatalabAssets {
     add_action( 'enqueue_block_editor_assets', function(){
       wp_deregister_script('ucd-components');
     }, 1000);
+    add_action('admin_enqueue_scripts', [$this, 'enqueuePublicScriptsInAdmin']);
     add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorScripts'], 3);
     add_filter('ucd-theme/site/block-settings', [$this, 'modifyDefaultPostImgUrl'], 10, 1);
   }
@@ -66,9 +68,36 @@ class UcdlibDatalabAssets {
   }
 
   /**
+   * Register and load public js bundle in certain admin screens
+   * We code split the bundle so we only load what is needed
+   */
+  public function enqueuePublicScriptsInAdmin($hook){
+    if ( strpos($hook, $this->plugin->config->slug) === false ) return;
+    $this->enqueuePublicScripts(true);
+    $this->enqueueFonts();
+  }
+
+  /**
+   * Enqueue stylesheet that just loads the fonts
+   * Need to add the font loading divs to the footer because of custom elements
+   */
+  public function enqueueFonts(){
+    wp_enqueue_style(
+      $this->plugin->config->slug . '-fonts',
+      $this->fontsUrl . '/fonts.css',
+      array(),
+      $this->bundleVersion()
+    );
+
+    add_action('admin_footer', function(){
+      echo '<div class="load-font-awesome">placeholder</div>';
+    });
+  }
+
+  /**
    * Register and load public js/css assets
    */
-  public function enqueuePublicScripts(){
+  public function enqueuePublicScripts($dontLoadStyles=false){
     $slug = $this->plugin->config->slug;
     $pluginDir = $this->plugin->config->pluginUrl();
     $jsPath = $this->jsPublicUrlDist;
@@ -84,6 +113,8 @@ class UcdlibDatalabAssets {
       array(),
       $this->bundleVersion()
     );
+
+    if ( $dontLoadStyles ) return;
     wp_enqueue_style(
       $slug,
       $cssPath,

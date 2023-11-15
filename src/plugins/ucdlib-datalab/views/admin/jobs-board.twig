@@ -1,0 +1,9 @@
+{% if userCanView %}
+<ucdlib-dl-jobs-board-admin
+  wp-nonce="{{wpNonce}}"
+  rest-namespace="{{restNamespace}}"
+  logo-url="{{logoUrl}}"
+  logo-width="{{logoWidth}}"></ucdlib-dl-jobs-board-admin>
+{% else %}
+<p>You do not have permission to view this page.</p>
+{% endif %}

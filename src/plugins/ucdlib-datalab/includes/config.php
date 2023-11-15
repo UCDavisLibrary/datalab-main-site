@@ -47,4 +47,8 @@ class UcdlibDatalabConfig {
   public function pluginPath($trailingSlash = true){
     return WP_PLUGIN_DIR . '/' . $this->slug . ($trailingSlash ? '/' : '');
   }
+
+  public function pluginEntryPoint(){
+    return $this->pluginPath() . $this->slug . '.php';
+  }
 }
