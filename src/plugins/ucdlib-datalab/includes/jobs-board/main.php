@@ -13,6 +13,9 @@ class UcdlibDatalabJobsBoard {
     $this->capability = 'manage_jobs_board';
     $this->role = 'jobs_board_manager';
     $this->adminMenuSlug = $this->plugin->config->slug . '-jobs-board';
+    $this->optionsKeys = [
+      'settings' => $this->plugin->config->slug . '_jobs_board_settings'
+    ];
 
     $this->init();
   }
@@ -23,6 +26,17 @@ class UcdlibDatalabJobsBoard {
 
     add_action('current_screen', [$this, 'addCapability']);
     add_action('admin_menu', [$this, 'addMenuItem']);
+  }
+
+  public function updateAdminSettings( $data ){
+    $settings = $this->getAdminSettings();
+    $settings = array_merge( $settings, $data );
+    update_option( $this->optionsKeys['settings'], $settings );
+  }
+
+  public function getAdminSettings(){
+    $settings = get_option( $this->optionsKeys['settings'], [] );
+    return $settings;
   }
 
   /**

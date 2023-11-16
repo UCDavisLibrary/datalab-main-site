@@ -43,4 +43,8 @@
 }
 .load-font-awesome {
   font-family: "Font Awesome 5 Free";
+  visibility: hidden;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 }

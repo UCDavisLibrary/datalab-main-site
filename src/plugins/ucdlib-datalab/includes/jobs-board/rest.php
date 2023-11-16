@@ -23,22 +23,86 @@ class UcdlibDatalabJobsBoardRest {
    * Register API routes
    */
   public function registerRoutes(){
-    register_rest_route( $this->routeNamespace, '/admin-init', [
+    register_rest_route( $this->routeNamespace, '/admin-settings', [
       'methods' => 'GET',
-      'callback' => [$this, 'adminInitRoute'],
+      'callback' => [$this, 'getAdminSettings'],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
-      //'permission_callback' => [$this, 'routePermissionCallbackPublic']
+    ]);
+    register_rest_route( $this->routeNamespace, '/admin-settings', [
+      'methods' => 'POST',
+      'callback' => [$this, 'saveAdminSettings'],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
   }
 
   /**
-   * Callback for /admin-init route
-   * Gets all data needed to initialize the admin jobs board page
+   * Callback for POST /admin-settings
    */
-  public function adminInitRoute(){
-    $out = [
-      'forms' => $this->jobsBoard->form->getForms(null, 1, 1000, true)
-    ];
+  public function saveAdminSettings( $request ){
+    $data = $request->get_json_params();
+    if ( !$data ) {
+      return new WP_Error( 'no-data', 'No data provided', ['status' => 400] );
+    }
+
+    // update settings
+    $settings = [];
+    $keys = ['selectedForm'];
+    foreach( $keys as $key ){
+      if ( isset($data[$key]) ) {
+        $settings[$key] = $data[$key];
+      }
+    }
+    if ( count($settings)  ) {
+      $this->jobsBoard->updateAdminSettings( $settings );
+    }
+
+    // update user roles
+    if ( isset($data['addBoardManagers']) && is_array($data['addBoardManagers']) ) {
+      foreach( $data['addBoardManagers'] as $userId ){
+        $user = get_user_by( 'id', $userId );
+        if ( $user ) {
+          $user->add_role( $this->jobsBoard->role );
+        }
+      }
+    }
+    if ( isset($data['removeBoardManagers']) && is_array($data['removeBoardManagers']) ) {
+      foreach( $data['removeBoardManagers'] as $userId ){
+        $user = get_user_by( 'id', $userId );
+        if ( $user ) {
+          $user->remove_role( $this->jobsBoard->role );
+        }
+      }
+    }
+
+    return $this->getAdminSettings();
+  }
+
+  /**
+   * Callback for GET /admin-settings
+   */
+  public function getAdminSettings(){
+    $out = $this->jobsBoard->getAdminSettings();
+    $out['forms'] = $this->jobsBoard->form->getForms(null, 1, 1000, true);
+
+    // get list of users
+    // datalab doesnt have a lot of users so no pagination is fine i think
+    $users = [];
+    $userQuery = new WP_User_Query([
+      'orderby' => 'display_name',
+      'order' => 'ASC'
+    ]);
+    if ( !empty($userQuery->results) ) {
+      foreach( $userQuery->results as $user ){
+        $users[] = [
+          'id' => $user->ID,
+          'name' => $user->display_name,
+          'isSiteAdmin' => in_array( 'administrator', $user->roles ),
+          'isBoardManager' => in_array( $this->jobsBoard->role, $user->roles )
+        ];
+      }
+    }
+    $out['users'] = $users;
+
     return $out;
   }
 
