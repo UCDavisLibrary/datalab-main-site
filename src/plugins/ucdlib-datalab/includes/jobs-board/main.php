@@ -17,6 +17,11 @@ class UcdlibDatalabJobsBoard {
       'settings' => $this->plugin->config->slug . '_jobs_board_settings'
     ];
 
+    $this->jobStatuses = [
+      'pending' => ['slug' => 'pending', 'label' => 'Pending']
+    ];
+    $this->jobStatusMetaKey ='job-status';
+
     $this->init();
   }
 
@@ -36,6 +41,12 @@ class UcdlibDatalabJobsBoard {
 
   public function getAdminSettings(){
     $settings = get_option( $this->optionsKeys['settings'], [] );
+
+    // ensure we have associative arrays where needed
+    if ( empty($settings['selectedFormFields']) ){
+      $settings['selectedFormFields'] = ['dummyField' => ''];
+    }
+
     return $settings;
   }
 

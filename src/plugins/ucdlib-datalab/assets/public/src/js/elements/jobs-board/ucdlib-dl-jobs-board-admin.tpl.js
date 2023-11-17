@@ -200,13 +200,32 @@ export function renderSettings(){
         <div class="field-container">
           <label>Form</label>
           <select
-            @input=${e => this._onPageDataInput(id, 'selectedForm', e.target.value)}
+            @input=${this._onSettingsFormSelect}
             .value=${page.data.selectedForm}>
             <option value="" >Select an existing form</option>
             ${page.data.forms.map(form => html`
               <option value=${form.id} ?selected=${page.data.selectedForm == form.id}>${form.title}</option>
             `)}
           </select>
+        </div>
+        <div>
+          <label>Job Submission Form Fields</label>
+          <p class='u-space-mb--flush'>Match the following fields to the corresponding job submission form field.</p>
+          <div class='o-box'>
+            ${this.formFields.map(field => html`
+              <div class='field-container'>
+                <label>${field.name}</label>
+                <select
+                  @input=${e => this._onSettingsFormFieldSelect(field.settingsProp, e.target.value)}
+                  .value=${page.data.selectedFormFields[field.settingsProp]}>
+                  <option value="">Select a form field</option>
+                  ${page.data.formFields.map(formField => html`
+                    <option value=${formField.id} ?selected=${page.data.selectedFormFields[field.settingsProp] == formField.id}>${formField.label}</option>
+                  `)}
+                </select>
+              </div>
+            `)}
+          </div>
         </div>
       </fieldset>
       <fieldset>
@@ -232,7 +251,7 @@ export function renderSettings(){
                   id="user-remove-${user.id}"
                   type="checkbox"
                   @change=${() => this._onManagerRemoveToggle(user.id)}
-                  ?checked=${page.data.removeBoardManagers.includes(user.id)}
+                  .checked=${page.data.removeBoardManagers.includes(user.id)}
                   ?disabled=${user.isSiteAdmin}>
                 <label class='hide-on-desktop' for="user-remove-${user.id}">Remove</label>
               </div>

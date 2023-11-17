@@ -49,22 +49,12 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.logoWidth = '';
     this.loadingHeight = 'auto';
 
-    // blank data templates for each page
-    this.dataTemplates = {
-      settings: {
-        forms: [],
-        selectedForm: '',
-        users: [],
-        addBoardManagers: [],
-        removeBoardManagers: []
-      }
-    }
-
     this.pages = [
       {
         id: 'pending',
         name: 'Pending Requests',
-        render: this.renderPendingRequests
+        render: this.renderPendingRequests,
+        getData: this.getPendingRequests,
       },
       {
         id: 'active',
@@ -81,7 +71,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         name: 'Settings',
         render: this.renderSettings,
         getData: this.getSettings,
-        data: JSON.parse(JSON.stringify(this.dataTemplates.settings))
+        data: this.getPageDataTemplate('settings')
       },
       {
         id: 'loading',
@@ -96,10 +86,52 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         noNav: true
       }
     ];
-    this._onPageChange(0);
+    this.page = 'loading';
 
     this.apiEndpoints = {
       settings: 'admin-settings',
+      formFields: 'form-fields',
+      submissions: 'submissions'
+    }
+
+    this.formFields = [
+      {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
+      {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate'}
+    ]
+  }
+
+  firstUpdated(){
+    this._onPageChange(0);
+  }
+
+  async getPendingRequests(){
+    const d = await this.api.get(this.apiEndpoints.submissions + '/pending');
+    return d;
+  }
+
+  /**
+   * @description Returns the data template for the specified page
+   * @param {String} page - Page id
+   * @returns
+   */
+  getPageDataTemplate(page){
+    if ( !page ) return {};
+    if ( page === 'pending' ){
+      return {
+        totalCt: 0,
+        pagedSubmissions: []
+      }
+    }
+    if ( page === 'settings' ){
+      return {
+        forms: [],
+        selectedForm: '',
+        selectedFormFields: {},
+        users: [],
+        addBoardManagers: [],
+        removeBoardManagers: [],
+        formFields: []
+      }
     }
   }
 
@@ -129,14 +161,18 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    * @returns {Object}
    */
   async getSettings(){
-    return await this.api.get(this.apiEndpoints.settings);
+    const d = await this.api.get(this.apiEndpoints.settings);
+    this.settingsCacheKey = d.cacheKey;
+    return d;
   }
 
   /**
    * @description Clears the local cache for the admin settings
    */
   clearSettingsCache(){
-    this.api.clearCache(this.apiEndpoints.settings);
+    if ( this.settingsCacheKey ){
+      this.api.clearCache(this.settingsCacheKey);
+    }
   }
 
   /**
@@ -144,10 +180,12 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    * @param {*} e
    */
   async _onSettingsSubmit(e){
+    const id = 'settings';
     e.preventDefault();
-    const page = this.pages.find(p => p.id === 'settings');
+    const page = this.pages.find(p => p.id === id);
 
-    const dropProps = ['forms', 'users'];
+    // remove props we dont need to send to server
+    const dropProps = ['forms', 'users', 'formFields'];
     const payload = {...page.data};
     dropProps.forEach(prop => delete payload[prop]);
 
@@ -157,13 +195,19 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       this.page = 'error';
       return;
     }
-    page.data = {...JSON.parse(JSON.stringify(this.dataTemplates.settings)), ...data.data};
-    this.page = 'settings';
+    page.data = {...this.getPageDataTemplate(id), ...data.data};
+    this.page = id;
+    this.clearSettingsCache();
     this.requestUpdate();
     this.showSuccessMessage('Settings saved');
 
   }
 
+  /**
+   * @description Will show a success message at the top of the page
+   * @param {String} message - The message to show
+   * @returns
+   */
   async showSuccessMessage(message){
     if ( !message ) return;
     if ( this.successMessage.show ) return;
@@ -197,6 +241,35 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.requestUpdate();
   }
 
+  _onSettingsFormFieldSelect(field, value){
+    const page = this.pages.find(p => p.id === 'settings');
+    page.data.selectedFormFields[field] = value;
+    this.requestUpdate();
+  }
+
+  /**
+   * @description Handles the event when the submission form select is changed on the settings page
+   * @param {*} e
+   * @returns
+   */
+  async _onSettingsFormSelect(e){
+    const formId = e.target.value;
+
+    // get form fields for selected form
+    const d = await this.api.get(`${this.apiEndpoints.formFields}/${formId}`);
+    if ( d.status === 'error' ) {
+      this.page = 'error';
+      return;
+    }
+    this._onPageDataInput('settings', 'selectedForm', formId)
+    this._onPageDataInput('settings', 'formFields', d.data);
+  }
+
+  /**
+   * @description Handles the event fired when a board manager remove checkbox is toggled
+   * @param {String} userId - The wp id of the user that was toggled
+   * @returns
+   */
   _onManagerRemoveToggle(userId){
     userId = parseInt(userId);
     if ( !userId ) return;

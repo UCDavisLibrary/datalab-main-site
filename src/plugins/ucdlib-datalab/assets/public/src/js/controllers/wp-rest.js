@@ -18,10 +18,11 @@ export default class WpRest {
 
   async get(path, params={}) {
     try {
-      const data = await this._fetch(path, {params});
+      const data = await this._fetch(path, {params, method: 'GET'});
       return {
         status: 'success',
-        data
+        data: data.data,
+        cacheKey: data.cacheKey
       }
     } catch (error) {
       return {
@@ -36,7 +37,8 @@ export default class WpRest {
       const data = await this._fetch(path, {method: 'POST', payload, params});
       return {
         status: 'success',
-        data
+        data: data.data,
+        cacheKey: data.cacheKey
       }
     } catch (error) {
       return {
@@ -51,7 +53,8 @@ export default class WpRest {
       const data = await this._fetch(path, {method: 'PUT', payload, params});
       return {
         status: 'success',
-        data
+        data: data.data,
+        cacheKey: data.cacheKey
       }
     } catch (error) {
       return {
@@ -63,11 +66,17 @@ export default class WpRest {
 
   _fetch(path, options={}) {
     let url = this.getApiUrl(path);
+    if ( !options.method ) {
+      options.method = 'GET';
+    }
     let cacheKey = this._getCacheKey(url, options);
     let cache = this.cache[cacheKey];
 
-    if( cache ) {
-      return cache;
+    if( options.method === 'GET' && cache ) {
+      return {
+        data: cache,
+        cacheKey
+      };
     }
 
     if( this.requestsInProgress[cacheKey] ) {
@@ -100,7 +109,8 @@ export default class WpRest {
     }).then(data => {
       delete this.requestsInProgress[cacheKey];
       this.cache[cacheKey] = data;
-      return data;
+
+      return {data, cacheKey};
     });
 
     this.requestsInProgress[cacheKey] = request;
@@ -111,10 +121,16 @@ export default class WpRest {
     return `${window.location.origin}/wp-json/${this.host.restNamespace}/${path}`;
   }
 
-  _getCacheKey(url, options) {
-    let key = url;
+  _getCacheKey(url, options={}) {
+    const u = url.split(`${this.host.restNamespace}/`)[1];
+    if ( !options.method ) {
+      options.method = 'GET';
+    }
+    let key = `${options.method}:${u}`;
     if( options.params ) {
-      key += JSON.stringify(options.params);
+      const p = new URLSearchParams(options.params);
+      p.sort();
+      key += p.toString();
     }
     if( options.payload ) {
       key += JSON.stringify(options.payload);

@@ -33,6 +33,32 @@ class UcdlibDatalabJobsBoardRest {
       'callback' => [$this, 'saveAdminSettings'],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
+    register_rest_route( $this->routeNamespace, '/form-fields/(?P<id>[\d]+)', [
+      'methods' => 'GET',
+      'callback' => [$this, 'getFormFields'],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
+    ]);
+    register_rest_route( $this->routeNamespace, '/submissions/(?P<status>[a-zA-Z0-9-]+)', [
+      'methods' => 'GET',
+      'callback' => [$this, 'getSubmissions'],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
+    ]);
+  }
+
+  public function getSubmissions( $request ){
+    $status = $request->get_param('status');
+    if ( !$status ) {
+      return new WP_Error( 'no-status', 'No status provided', ['status' => 400] );
+    }
+    $allowedStatuses = array_keys( $this->jobsBoard->jobStatuses );
+    if ( !in_array($status, $allowedStatuses) ) {
+      return new WP_Error( 'invalid-status', 'Invalid status provided', ['status' => 400] );
+    }
+    $out = [
+      'totalCt' => $this->jobsBoard->form->getSubmissionCountByStatus( $status )
+    ];
+    return $out;
+
   }
 
   /**
@@ -46,7 +72,7 @@ class UcdlibDatalabJobsBoardRest {
 
     // update settings
     $settings = [];
-    $keys = ['selectedForm'];
+    $keys = ['selectedForm', 'selectedFormFields'];
     foreach( $keys as $key ){
       if ( isset($data[$key]) ) {
         $settings[$key] = $data[$key];
@@ -103,7 +129,25 @@ class UcdlibDatalabJobsBoardRest {
     }
     $out['users'] = $users;
 
+    // form fields
+    $out['formFields'] = [];
+    if ( isset($out['selectedForm']) ) {
+      $out['formFields'] = $this->jobsBoard->form->getFormFields( $out['selectedForm'], true );
+    }
+
     return $out;
+  }
+
+  /**
+   * Callback for GET /form-fields/{id}
+   */
+  public function getFormFields( $request ){
+    $formId = $request->get_param('id');
+    if ( !$formId ) {
+      return new WP_Error( 'no-form-id', 'No form id provided', ['status' => 400] );
+    }
+    $fields = $this->jobsBoard->form->getFormFields( $formId, true );
+    return $fields;
   }
 
   /**
