@@ -8,8 +8,8 @@ export default class WpRest {
 
   clearCache($key){
     if( $key ) {
-      delete this.cache[$key];
-      delete this.requestsInProgress[$key];
+      if ( this.cache[$key] ) delete this.cache[$key];
+      if ( this.requestsInProgress[$key] ) delete this.requestsInProgress[$key];
     } else {
       this.cache = {};
       this.requestsInProgress = {};
@@ -66,6 +66,9 @@ export default class WpRest {
 
   _fetch(path, options={}) {
     let url = this.getApiUrl(path);
+    if ( Object.keys(options.params || {}).length ) {
+      url += `?${new URLSearchParams(options.params).toString()}`;
+    }
     if ( !options.method ) {
       options.method = 'GET';
     }

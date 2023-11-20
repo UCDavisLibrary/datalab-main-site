@@ -88,6 +88,12 @@ export function styles() {
   .board-manager-list__row:nth-child(odd) {
     background-color: #ebf3fa;
   }
+  .board-job-list__row {
+    padding: .5rem;
+  }
+  .board-job-list__row:nth-child(odd) {
+    background-color: #ebf3fa;
+  }
 
   @media screen and (max-width: 993px) {
     .hide-on-mobile {
@@ -98,6 +104,12 @@ export function styles() {
     .hide-on-desktop {
       display: none !important;
     }
+  }
+
+  .board-job-list__header {
+    font-weight: 700;
+    color: #022851;
+    padding: 0 .5rem;
   }
 
 
@@ -160,9 +172,66 @@ return html`
  * @description Renders the page that displays any pending job submission requests
  */
 export function renderPendingRequests(){
+  const id = 'pending'
+  const page = this.pages.find(p => p.id == id);
+  const submissions = (page.data.pagedSubmissions[page.data.page - 1] || []).map(submission => {
+    submission.display = {};
+    submission.display.jobTitle = submission.meta_data[page.data.assignedFormFields.jobTitle]?.value || '';
+    if ( page.data.actions.approve.includes(submission.entry_id) ) {
+      submission.display.action = 'approve';
+    } else if ( page.data.actions.deny.includes(submission.entry_id) ) {
+      submission.display.action = 'deny';
+    } else {
+      submission.display.action = '';
+    }
+
+    return submission;
+  });
   return html`
     <h3>Pending Requests</h3>
-    <p>These are the pending requests</p>
+    <div ?hidden=${page.data.totalCt}>
+      <div class="brand-textbox u-space-my">
+        <p>There are no pending job posting requests.</p>
+      </div>
+    </div>
+    <form ?hidden=${!page.data.totalCt} class='u-space-mt' @submit=${this._onListingActionSubmit}>
+      <div>
+        <div class="l-2col l-2col--67-33 board-job-list__header hide-on-mobile">
+          <div class="l-first">Job</div>
+          <div class="l-second">Action</div>
+        </div>
+        ${submissions.map(submission => html`
+        <div class="l-2col l-2col--67-33 board-job-list__row">
+          <div class="l-first">
+            <div class="u-space-mb--small">
+              <div>${submission.display.jobTitle}</div>
+            </div>
+          </div>
+          <div class="l-second">
+            <div class="flex board-job-list__select">
+              <label class='hide-on-desktop'>Action</label>
+              <select .value=${submission.display.action} @input=${e => this._onPendingAction(submission.entry_id, e.target.value)}>
+                <option value="" ?selected=${submission.display.action == ''}>Select an action</option>
+                <option value="approve" ?selected=${submission.display.action == 'approve'}>Approve</option>
+                <option value="deny" ?selected=${submission.display.action == 'deny'}>Deny</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        `)}
+      </div>
+      <div ?hidden=${page.data.totalPageCt <= 1}>
+        <ucd-theme-pagination
+          current-page=${page.data.page}
+          max-pages=${page.data.totalPageCt}
+          xs-screen
+          @page-change=${e => this._onListingPaginationChange(id, e.detail.page)}>
+        </ucd-theme-pagination>
+      </div>
+      <div class='u-space-mt'>
+        <button type="submit" class='btn btn--primary'>Save</button>
+      </div>
+    </form>
   `;
 }
 

@@ -54,7 +54,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         id: 'pending',
         name: 'Pending Requests',
         render: this.renderPendingRequests,
-        getData: this.getPendingRequests,
+        getData: this.getPendingRequests
       },
       {
         id: 'active',
@@ -70,8 +70,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         id: 'settings',
         name: 'Settings',
         render: this.renderSettings,
-        getData: this.getSettings,
-        data: this.getPageDataTemplate('settings')
+        getData: this.getSettings
       },
       {
         id: 'loading',
@@ -86,6 +85,11 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         noNav: true
       }
     ];
+    this.pages.forEach(page => {
+      page.data = this.getPageDataTemplate(page.id);
+      page.cacheKeys = [];
+    });
+
     this.page = 'loading';
 
     this.apiEndpoints = {
@@ -104,22 +108,24 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this._onPageChange(0);
   }
 
-  async getPendingRequests(){
-    const d = await this.api.get(this.apiEndpoints.submissions + '/pending');
-    return d;
-  }
-
   /**
    * @description Returns the data template for the specified page
    * @param {String} page - Page id
    * @returns
    */
   getPageDataTemplate(page){
-    if ( !page ) return {};
     if ( page === 'pending' ){
       return {
         totalCt: 0,
-        pagedSubmissions: []
+        totalPageCt: 0,
+        page: 1,
+        pagedSubmissions: [],
+        formFields: [],
+        actions: {
+          approve: [],
+          deny: []
+        },
+        assignedFormFields: {}
       }
     }
     if ( page === 'settings' ){
@@ -133,6 +139,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         formFields: []
       }
     }
+    return {};
   }
 
   /**
@@ -157,22 +164,105 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   }
 
   /**
+   * @description Clears cache for current page and retrieves new data
+   * @returns
+   */
+  async refreshCurrentPage(){
+    const page = this.getCurrentPage();
+    if ( !page ) return;
+    const pageIndex = this.getCurrentPageIndex();
+    this.clearPageCache(this.page);
+    await this._onPageChange(pageIndex);
+  }
+
+  /**
+   * @description Returns the index of the current page in the pages array
+   * @returns
+   */
+  getCurrentPageIndex(){
+    return this.pages.findIndex(p => p.id === this.page);
+  }
+
+  /**
+   * @description Returns the current page object
+   * @returns {Object}
+   */
+  getCurrentPage(){
+    return this.pages.find(p => p.id === this.page);
+  }
+
+  /**
+   * @description Retrieves the pending requests for the jobs board
+   * @param {Number} p - Page number
+   * @returns {Object}
+   */
+  async getPendingRequests(p){
+    if ( !p ) p = 1;
+    const d = await this.api.get(this.apiEndpoints.submissions + '/pending', {page: p});
+    if ( d.status === 'error'  ) return;
+
+    const page = this.pages.find(p => p.id === 'pending');
+    if ( !page.cacheKeys.includes(d.cacheKey) ) {
+      page.cacheKeys.push(d.cacheKey);
+    }
+
+    // merge paged submissions into array of arrays
+    d['data']['pagedSubmissions'] = [...page.data.pagedSubmissions] || [];
+    d['data']['pagedSubmissions'][d.data.page - 1] = d.data.submissions;
+    d['data']['pagedSubmissions'] = d['data']['pagedSubmissions'].map(submissions => submissions || []);
+    return d;
+  }
+
+  /**
+   * @description Handles event when listing pagination element is changed
+   * @param {String} id - Page id. i.e. 'pending'
+   * @param {Number} requestedPage - Numerical listing page requested
+   * @returns
+   */
+  async _onListingPaginationChange(id, requestedPage){
+    const page = this.pages.find(p => p.id === id);
+    this._showLoading();
+    const data = await page.getData.call(this, requestedPage);
+    if ( data.status === 'error' ) {
+      this.page = 'error';
+      return;
+    }
+    page.data = {...page.data, ...data.data};
+    this.page = id;
+    this.requestUpdate();
+  }
+
+  /**
    * @description Retrieves the admin settings for the jobs board
    * @returns {Object}
    */
   async getSettings(){
     const d = await this.api.get(this.apiEndpoints.settings);
-    this.settingsCacheKey = d.cacheKey;
+    if ( d.status === 'error' ) return;
+    const page = this.pages.find(p => p.id === 'settings');
+    if ( !page.cacheKeys.includes(d.cacheKey) ) {
+      page.cacheKeys.push(d.cacheKey);
+    }
     return d;
   }
 
-  /**
-   * @description Clears the local cache for the admin settings
-   */
-  clearSettingsCache(){
-    if ( this.settingsCacheKey ){
-      this.api.clearCache(this.settingsCacheKey);
+  _onPendingAction(submissionId, action){
+    submissionId = parseInt(submissionId);
+    if ( !submissionId ) return;
+
+    // update action arrays
+    const page = this.pages.find(p => p.id === 'pending');
+    Object.keys(page.data.actions).forEach(key => {
+      const index = page.data.actions[key].indexOf(submissionId);
+      if ( index > -1 ) {
+        page.data.actions[key].splice(index, 1);
+      }
+    });
+    if ( action ) {
+      page.data.actions[action].push(submissionId);
     }
+
+    this.requestUpdate();
   }
 
   /**
@@ -197,7 +287,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     }
     page.data = {...this.getPageDataTemplate(id), ...data.data};
     this.page = id;
-    this.clearSettingsCache();
+    this.api.clearCache();
     this.requestUpdate();
     this.showSuccessMessage('Settings saved');
 
@@ -230,6 +320,22 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   }
 
   /**
+   * STEVE THIS IS WHERE YOU LEFT OFF
+   * @param {*} e
+   */
+  async _onListingActionSubmit(e){
+    e.preventDefault();
+    const page = this.getCurrentPage();
+    const payload = page.data.actions;
+    console.log(payload);
+
+    this.api.clearCache();
+    await this.refreshCurrentPage();
+    let message = 'Save successful';
+    this.showSuccessMessage(message);
+  }
+
+  /**
    * @description Handles the event fired when a page data input is changed
    * @param {String} pageId - The id of the page that the input belongs to
    * @param {String} key - The key of the page's data object to update
@@ -241,6 +347,11 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.requestUpdate();
   }
 
+  /**
+   * @description Handles event when a job board form field is matched to a submission form field
+   * @param {String} field - The id of the job board form field
+   * @param {String} value - The id of the submission form field
+   */
   _onSettingsFormFieldSelect(field, value){
     const page = this.pages.find(p => p.id === 'settings');
     page.data.selectedFormFields[field] = value;
@@ -263,6 +374,18 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     }
     this._onPageDataInput('settings', 'selectedForm', formId)
     this._onPageDataInput('settings', 'formFields', d.data);
+  }
+
+  /**
+   * @description Clears the data cache for the specified page
+   * @param {String} pageId - The id of the page to clear the cache for
+   */
+  clearPageCache(pageId){
+    const page = this.pages.find(p => p.id === pageId);
+    const cacheKeys = page.cacheKeys || [];
+    cacheKeys.forEach(key => {
+      this.api.clearCache(key);
+    });
   }
 
   /**

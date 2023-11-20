@@ -41,12 +41,27 @@ class UcdlibDatalabJobsBoardRest {
     register_rest_route( $this->routeNamespace, '/submissions/(?P<status>[a-zA-Z0-9-]+)', [
       'methods' => 'GET',
       'callback' => [$this, 'getSubmissions'],
+      'args' => [
+        'status' => [
+          'required' => true
+        ],
+        'page' => [
+          'required' => false,
+          'validate_callback' => function($param, $request, $key){
+            return is_numeric($param);
+          }
+        ]
+      ],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
   }
 
+  /**
+   * Callback for GET /submissions/{status}
+   */
   public function getSubmissions( $request ){
     $status = $request->get_param('status');
+    $page = $request->get_param('page') ?: 1;
     if ( !$status ) {
       return new WP_Error( 'no-status', 'No status provided', ['status' => 400] );
     }
@@ -54,8 +69,18 @@ class UcdlibDatalabJobsBoardRest {
     if ( !in_array($status, $allowedStatuses) ) {
       return new WP_Error( 'invalid-status', 'Invalid status provided', ['status' => 400] );
     }
+    $totalCt = $this->jobsBoard->form->getSubmissionCountByStatus( $status );
+    $submissions = $this->jobsBoard->form->getSubmissionsByStatus( $status, $page );
+    $formFields = $this->jobsBoard->form->getActiveFormFields();
+    $formFields = $this->jobsBoard->form->getFieldsFromWrappers( $formFields );
+
     $out = [
-      'totalCt' => $this->jobsBoard->form->getSubmissionCountByStatus( $status )
+      'totalCt' => $totalCt,
+      'totalPageCt' => ceil( $totalCt / $this->jobsBoard->jobsPerPage ),
+      'page' => $page,
+      'submissions' => $submissions,
+      'formFields' => $formFields,
+      'assignedFormFields' => $this->jobsBoard->getAdminSettings()['selectedFormFields']
     ];
     return $out;
 

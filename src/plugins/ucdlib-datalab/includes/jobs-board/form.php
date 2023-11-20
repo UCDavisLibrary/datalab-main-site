@@ -63,16 +63,84 @@ class UcdlibDatalabJobsBoardForm {
     global $wpdb;
     $sql = "SELECT COUNT(*) FROM {$this->entryTable} e
       INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
-      WHERE e.form_id = %d AND em.meta_key = %s AND em.meta_value = %s";
+      WHERE e.form_id = %d AND em.meta_key = %s AND em.meta_value = %s AND e.is_spam = 0";
 
     $sql = $wpdb->prepare( $sql, $formId, $metaKey, $status );
     $count = $wpdb->get_var( $sql );
+    $count = intval( $count );
 
     // cache result
     wp_cache_set( $cacheKey, $count );
 
     return $count;
 
+  }
+
+  /**
+   * Get job submission entries by status
+   */
+  public function getSubmissionsByStatus($status, $page=1){
+    $ids = $this->getSubmissionIdsByStatus($status, $page);
+    return $this->getSubmissionsById($ids);
+  }
+
+  /**
+   * Get job submission entries by id
+   */
+  public function getSubmissionsById($ids=[]){
+    if ( !$this->apiAvailable() ) return [];
+    if ( empty($ids) ) return [];
+
+    // get form id
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return [];
+    $formId = $settings['selectedForm'];
+
+    $submissions = [];
+    foreach( $ids as $id ){
+      $submission = Forminator_API::get_entry( $formId, $id );
+      if ( is_wp_error($submission) ) continue;
+      $submissions[] = $submission;
+    }
+
+    return $submissions;
+  }
+
+  /**
+   * Get job submission entry IDs by status
+   * ordered by entry_id desc
+   */
+  public function getSubmissionIdsByStatus($status, $page=1){
+    if ( !$this->apiAvailable() ) return [];
+
+    // check cache
+    $cacheKey = $this->plugin->config->slug . '_jobs_board_submissions_' . $status . '_' . $page;
+    $submissions = wp_cache_get( $cacheKey );
+    if ( $submissions !== false ) return $submissions;
+
+    // get form id
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return [];
+    $formId = $settings['selectedForm'];
+
+    // construct sql query with pagination
+    $metaKey = 'forminator_addon_dl-jb_' . $this->jobsBoard->jobStatusMetaKey;
+    $offset = ($page - 1) * $this->jobsBoard->jobsPerPage;
+    global $wpdb;
+    $sql = "SELECT e.entry_id FROM {$this->entryTable} e
+      INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
+      WHERE e.form_id = %d AND em.meta_key = %s AND em.meta_value = %s AND e.is_spam = 0
+      ORDER BY e.entry_id DESC
+      LIMIT %d, %d";
+
+    $sql = $wpdb->prepare( $sql, $formId, $metaKey, $status, $offset, $this->jobsBoard->jobsPerPage );
+    $submissions = $wpdb->get_col( $sql );
+    $submissions = array_map( 'intval', $submissions );
+
+    // cache result
+    wp_cache_set( $cacheKey, $submissions );
+
+    return $submissions;
   }
 
   /**
@@ -115,5 +183,29 @@ class UcdlibDatalabJobsBoardForm {
       }
     }
     return $basicFields;
+  }
+
+  /**
+   * Get form fields as associative array
+   */
+  public function getFieldsFromWrappers($form_wrappers){
+    $fields = [];
+    foreach ($form_wrappers as $fieldWrapper) {
+      if ( !isset($fieldWrapper['fields']) ) continue;
+      foreach ($fieldWrapper['fields'] as $field) {
+        $fields[$field['element_id']] = $field;
+      }
+    }
+    return $fields;
+  }
+
+  /**
+   * Get form fields for currently selected job submission form
+   */
+  public function getActiveFormFields($toBasicArray=false){
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return [];
+    $formId = $settings['selectedForm'];
+    return $this->getFormFields($formId, $toBasicArray);
   }
 }

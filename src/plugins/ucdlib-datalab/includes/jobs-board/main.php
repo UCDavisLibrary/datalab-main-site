@@ -21,6 +21,7 @@ class UcdlibDatalabJobsBoard {
       'pending' => ['slug' => 'pending', 'label' => 'Pending']
     ];
     $this->jobStatusMetaKey ='job-status';
+    $this->jobsPerPage = 10;
 
     $this->init();
   }
