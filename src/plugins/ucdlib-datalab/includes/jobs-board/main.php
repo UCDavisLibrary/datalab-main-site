@@ -18,8 +18,12 @@ class UcdlibDatalabJobsBoard {
     ];
 
     $this->jobStatuses = [
-      'pending' => ['slug' => 'pending', 'label' => 'Pending']
+      'pending' => ['slug' => 'pending', 'label' => 'Pending'],
+      'active' => ['slug' => 'active', 'label' => 'Active'],
+      'expired' => ['slug' => 'expired', 'label' => 'Expired']
     ];
+    $this->metaKeyPrefix = 'forminator_addon_dl-jb_';
+    $this->postedDateMetaKey = 'posted-date';
     $this->jobStatusMetaKey ='job-status';
     $this->jobsPerPage = 10;
 
@@ -49,6 +53,14 @@ class UcdlibDatalabJobsBoard {
     }
 
     return $settings;
+  }
+
+  public function listingExpirationField(){
+    $settings = $this->getAdminSettings();
+    if ( isset($settings['selectedFormFields']['listingEndDate']) ) {
+      return $settings['selectedFormFields']['listingEndDate'];
+    }
+    return '';
   }
 
   /**

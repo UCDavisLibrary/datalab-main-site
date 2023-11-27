@@ -75,9 +75,15 @@ class UcdlibDatalabJobsBoardAddonHooks extends Forminator_Addon_Form_Hooks_Abstr
   }
 
   public function add_entry_fields( $submitted_data, $form_entry_fields = array(), $entry = null ) {
-    return [[
-      'name' => $this->plugin->jobsBoard->jobStatusMetaKey,
-      'value' => $this->plugin->jobsBoard->jobStatuses['pending']['slug']
-    ]];
+    return [
+      [
+        'name' => $this->plugin->jobsBoard->jobStatusMetaKey,
+        'value' => $this->plugin->jobsBoard->jobStatuses['pending']['slug']
+      ],
+      [
+        'name' => $this->plugin->jobsBoard->postedDateMetaKey,
+        'value' => date('Y-m-d')
+      ]
+    ];
   }
 }

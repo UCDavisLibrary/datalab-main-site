@@ -69,6 +69,9 @@ export function styles() {
     font-size: 0.875rem;
     color: #13639e;
   }
+  .small-text {
+    font-size: 0.875rem;
+  }
   .board-manager-list__header {
     font-weight: 700;
     color: #022851;
@@ -90,6 +93,9 @@ export function styles() {
   }
   .board-job-list__row {
     padding: .5rem;
+  }
+  .pointer {
+    cursor: pointer;
   }
   .board-job-list__row:nth-child(odd) {
     background-color: #ebf3fa;
@@ -174,19 +180,6 @@ return html`
 export function renderPendingRequests(){
   const id = 'pending'
   const page = this.pages.find(p => p.id == id);
-  const submissions = (page.data.pagedSubmissions[page.data.page - 1] || []).map(submission => {
-    submission.display = {};
-    submission.display.jobTitle = submission.meta_data[page.data.assignedFormFields.jobTitle]?.value || '';
-    if ( page.data.actions.approve.includes(submission.entry_id) ) {
-      submission.display.action = 'approve';
-    } else if ( page.data.actions.deny.includes(submission.entry_id) ) {
-      submission.display.action = 'deny';
-    } else {
-      submission.display.action = '';
-    }
-
-    return submission;
-  });
   return html`
     <h3>Pending Requests</h3>
     <div ?hidden=${page.data.totalCt}>
@@ -194,6 +187,19 @@ export function renderPendingRequests(){
         <p>There are no pending job posting requests.</p>
       </div>
     </div>
+    ${renderJobListingsForm.call(this, page)}
+  `;
+}
+
+/**
+ * @description Renders the form for displaying job listings and their respective actions
+ * @param {Object} page - The page object from the pages array
+ * @returns
+ */
+function renderJobListingsForm(page){
+  const submissions = this._prepareSubmissionsForDisplay(page);
+  const actions = Object.keys(page.data.actions);
+  return html`
     <form ?hidden=${!page.data.totalCt} class='u-space-mt' @submit=${this._onListingActionSubmit}>
       <div>
         <div class="l-2col l-2col--67-33 board-job-list__header hide-on-mobile">
@@ -204,16 +210,18 @@ export function renderPendingRequests(){
         <div class="l-2col l-2col--67-33 board-job-list__row">
           <div class="l-first">
             <div class="u-space-mb--small">
-              <div>${submission.display.jobTitle}</div>
+              <div>${submission.display.jobTitle} ${submission.display.employer ? ` - ${submission.display.employer}` : ''}</div>
+              <a class='pointer small-text'>View</a>
             </div>
           </div>
           <div class="l-second">
             <div class="flex board-job-list__select">
               <label class='hide-on-desktop'>Action</label>
-              <select .value=${submission.display.action} @input=${e => this._onPendingAction(submission.entry_id, e.target.value)}>
+              <select .value=${submission.display.action} @input=${e => this._onListingAction(page.id, submission.entry_id, e.target.value)}>
                 <option value="" ?selected=${submission.display.action == ''}>Select an action</option>
-                <option value="approve" ?selected=${submission.display.action == 'approve'}>Approve</option>
-                <option value="deny" ?selected=${submission.display.action == 'deny'}>Deny</option>
+                ${actions.map(action => html`
+                  <option value=${action} ?selected=${submission.display.action == action}>${this.getListingActionLabel(action)}</option>
+                `)}
               </select>
             </div>
           </div>
@@ -225,7 +233,7 @@ export function renderPendingRequests(){
           current-page=${page.data.page}
           max-pages=${page.data.totalPageCt}
           xs-screen
-          @page-change=${e => this._onListingPaginationChange(id, e.detail.page)}>
+          @page-change=${e => this._onListingPaginationChange(page.id, e.detail.page)}>
         </ucd-theme-pagination>
       </div>
       <div class='u-space-mt'>
@@ -239,9 +247,16 @@ export function renderPendingRequests(){
  * @description Renders the page that displays any current active job listings
  */
 export function renderActiveListings(){
+  const id = 'active'
+  const page = this.pages.find(p => p.id == id);
   return html`
     <h3>Active Listings</h3>
-    <p>These are the active listings</p>
+    <div ?hidden=${page.data.totalCt}>
+      <div class="brand-textbox u-space-my">
+        <p>There are no listings currently being displayed on the jobs board.</p>
+      </div>
+    </div>
+    ${renderJobListingsForm.call(this, page)}
   `;
 }
 
@@ -249,9 +264,16 @@ export function renderActiveListings(){
  * @description Renders the page that displays any expired job listings
  */
 export function renderExpiredListings(){
+  const id = 'expired'
+  const page = this.pages.find(p => p.id == id);
   return html`
     <h3>Expired Listings</h3>
-    <p>These are the expired listings</p>
+    <div ?hidden=${page.data.totalCt}>
+      <div class="brand-textbox u-space-my">
+        <p>There are no expired listings.</p>
+      </div>
+    </div>
+    ${renderJobListingsForm.call(this, page)}
   `;
 }
 

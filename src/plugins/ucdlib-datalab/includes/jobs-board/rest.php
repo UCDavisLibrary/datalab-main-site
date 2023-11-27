@@ -8,6 +8,7 @@ class UcdlibDatalabJobsBoardRest {
     $this->plugin = $jobsBoard->plugin;
     $this->jobsBoard = $jobsBoard;
     $this->routeNamespace = $this->plugin->config->slug . '/jobs-board';
+    $this->allowedJobActions = ['approve', 'deny'];
 
     $this->init();
   }
@@ -40,7 +41,7 @@ class UcdlibDatalabJobsBoardRest {
     ]);
     register_rest_route( $this->routeNamespace, '/submissions/(?P<status>[a-zA-Z0-9-]+)', [
       'methods' => 'GET',
-      'callback' => [$this, 'getSubmissions'],
+      'callback' => [$this, 'submissionsByStatus'],
       'args' => [
         'status' => [
           'required' => true
@@ -54,12 +55,67 @@ class UcdlibDatalabJobsBoardRest {
       ],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
+    register_rest_route( $this->routeNamespace, '/submissions/(?P<status>[a-zA-Z0-9-]+)', [
+      'methods' => 'POST',
+      'callback' => [$this, 'submissionsByStatus'],
+      'args' => [
+        'status' => [
+          'required' => true
+        ],
+        'actions' => [
+          'required' => true,
+          'validate_callback' => [$this, 'validateSubmissionByStatusPost'],
+          'sanitize_callback' => [$this, 'sanitizeSubmissionByStatusPost']
+        ],
+      ],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
+    ]);
   }
 
   /**
-   * Callback for GET /submissions/{status}
+   * Sanitize callback for actions arg for POST /submissions/{status}
    */
-  public function getSubmissions( $request ){
+  public function sanitizeSubmissionByStatusPost( $param, $request, $key ){
+    foreach ($this->allowedJobActions as $action) {
+      if ( !isset($param[$action]) ) {
+        $param[$action] = [];
+      }
+      foreach( $param[$action] as $i => $id ){
+        $param[$action][$i] = intval($id);
+      }
+    }
+    return $param;
+  }
+
+  /**
+   * Validate callback for actions arg for POST /submissions/{status}
+   */
+  public function validateSubmissionByStatusPost( $param, $request, $key ){
+    if ( !is_array($param) ) return false;
+
+    // must have at least one recognized action as a list of ids
+    $hasAllowedAction = false;
+    foreach( $param as $action => $ids ){
+      if ( !in_array($action, $this->allowedJobActions) ) continue;
+      if ( !is_array($ids) ) continue;
+
+      $validIds = [];
+      foreach( $ids as $id ){
+        if ( is_numeric($id) ) {
+          $validIds[] = intval($id);
+        }
+      }
+      $submissions = $this->jobsBoard->form->getSubmissionsById( $validIds, true );
+      if ( count($submissions) !== count($ids) ) continue;
+      $hasAllowedAction = true;
+    }
+    return $hasAllowedAction;
+  }
+
+  /**
+   * Callback for GET and POST /submissions/{status}
+   */
+  public function submissionsByStatus( $request ){
     $status = $request->get_param('status');
     $page = $request->get_param('page') ?: 1;
     if ( !$status ) {
@@ -69,6 +125,57 @@ class UcdlibDatalabJobsBoardRest {
     if ( !in_array($status, $allowedStatuses) ) {
       return new WP_Error( 'invalid-status', 'Invalid status provided', ['status' => 400] );
     }
+
+    // handle any status updates
+    $isPost = $request->get_method() === 'POST';
+    if ( $isPost ){
+      $actions = $request->get_param('actions');
+      if ( !empty($actions['deny']) ){
+        $removed = $this->jobsBoard->form->deleteSubmissions( $actions['deny'] );
+        if (!$removed) {
+          return new WP_Error( 'delete-error', 'Error deleting submissions', ['status' => 500] );
+        }
+      }
+      if ( !empty($actions['approve']) ){
+        $submissions = $this->jobsBoard->form->getSubmissionsById( $actions['approve'], true );
+        foreach( $submissions as $submission ){
+          $newStatus = '';
+          if ( !$this->jobsBoard->listingExpirationField() ){
+            continue;
+          }
+          if ( empty($submission->meta_data[ $this->jobsBoard->listingExpirationField() ]) ) {
+            continue;
+          }
+          $expirationDate = $submission->meta_data[ $this->jobsBoard->listingExpirationField() ];
+          $expirationDateStamp = strtotime( $expirationDate['value'] );
+          if ( !$expirationDateStamp ) {
+            continue;
+          }
+          if ( $expirationDateStamp < time() ) {
+            $newStatus = 'expired';
+          } else {
+            $newStatus = 'active';
+          }
+
+          if ( $newStatus ) {
+            $metaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
+            if ( empty($submission->meta_data[ $metaKey ]) ){
+              continue;
+            }
+            $updated = $submission->update_meta( $submission->meta_data[ $metaKey ]['id'], $metaKey, $newStatus );
+            if ( is_wp_error($updated) ) {
+              return new WP_Error( 'update-error', 'Error updating submission', ['status' => 500] );
+            }
+            $postedDateKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->postedDateMetaKey;
+            if ( empty($submission->meta_data[ $postedDateKey ]) ){
+              continue;
+            }
+            $updated = $submission->update_meta( $submission->meta_data[ $postedDateKey ]['id'], $postedDateKey, date('Y-m-d') );
+          }
+        }
+      }
+    }
+
     $totalCt = $this->jobsBoard->form->getSubmissionCountByStatus( $status );
     $submissions = $this->jobsBoard->form->getSubmissionsByStatus( $status, $page );
     $formFields = $this->jobsBoard->form->getActiveFormFields();

@@ -11,6 +11,8 @@ class UcdlibDatalabJobsBoardForm {
     $this->entryTable = 'wp_frmt_form_entry';
     $this->entryMetaTable = 'wp_frmt_form_entry_meta';
 
+    $this->cacheKeys = [];
+
     $this->init();
   }
 
@@ -42,6 +44,12 @@ class UcdlibDatalabJobsBoardForm {
     return class_exists( 'Forminator_API' );
   }
 
+  public function clearWpCache(){
+    foreach( $this->cacheKeys as $cacheKey ){
+      wp_cache_delete( $cacheKey );
+    }
+  }
+
   /**
    * Get the total number of job submission entries by status
    */
@@ -59,7 +67,7 @@ class UcdlibDatalabJobsBoardForm {
     $formId = $settings['selectedForm'];
 
     // construct sql query
-    $metaKey = 'forminator_addon_dl-jb_' . $this->jobsBoard->jobStatusMetaKey;
+    $metaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
     global $wpdb;
     $sql = "SELECT COUNT(*) FROM {$this->entryTable} e
       INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
@@ -71,6 +79,9 @@ class UcdlibDatalabJobsBoardForm {
 
     // cache result
     wp_cache_set( $cacheKey, $count );
+    if ( !in_array($cacheKey, $this->cacheKeys) ) {
+      $this->cacheKeys[] = $cacheKey;
+    }
 
     return $count;
 
@@ -87,7 +98,7 @@ class UcdlibDatalabJobsBoardForm {
   /**
    * Get job submission entries by id
    */
-  public function getSubmissionsById($ids=[]){
+  public function getSubmissionsById($ids=[], $skipIfMissing=false){
     if ( !$this->apiAvailable() ) return [];
     if ( empty($ids) ) return [];
 
@@ -100,10 +111,30 @@ class UcdlibDatalabJobsBoardForm {
     foreach( $ids as $id ){
       $submission = Forminator_API::get_entry( $formId, $id );
       if ( is_wp_error($submission) ) continue;
+      if ( $skipIfMissing && empty($submission->entry_id) ) continue;
       $submissions[] = $submission;
     }
 
     return $submissions;
+  }
+
+  /**
+   * Delete job submission entries by id
+   */
+  public function deleteSubmissions($ids=[]){
+    if ( !$this->apiAvailable() ) return false;
+    if ( empty($ids) ) return false;
+
+    // get form id
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return false;
+    $formId = $settings['selectedForm'];
+
+    $deleted = Forminator_API::delete_entries( $formId, $ids );
+    if ( is_wp_error($deleted) ) return false;
+    $this->clearWpCache();
+
+    return $deleted;
   }
 
   /**
@@ -124,7 +155,7 @@ class UcdlibDatalabJobsBoardForm {
     $formId = $settings['selectedForm'];
 
     // construct sql query with pagination
-    $metaKey = 'forminator_addon_dl-jb_' . $this->jobsBoard->jobStatusMetaKey;
+    $metaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
     $offset = ($page - 1) * $this->jobsBoard->jobsPerPage;
     global $wpdb;
     $sql = "SELECT e.entry_id FROM {$this->entryTable} e
@@ -139,6 +170,9 @@ class UcdlibDatalabJobsBoardForm {
 
     // cache result
     wp_cache_set( $cacheKey, $submissions );
+    if ( !in_array($cacheKey, $this->cacheKeys) ) {
+      $this->cacheKeys[] = $cacheKey;
+    }
 
     return $submissions;
   }

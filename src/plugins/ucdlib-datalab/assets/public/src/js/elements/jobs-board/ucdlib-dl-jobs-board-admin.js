@@ -28,6 +28,8 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
 
   constructor() {
     super();
+
+    // bind templates
     this.render = templates.render.bind(this);
     this.renderPendingRequests = templates.renderPendingRequests.bind(this);
     this.renderActiveListings = templates.renderActiveListings.bind(this);
@@ -36,9 +38,11 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.renderLoading = templates.renderLoading.bind(this);
     this.renderError = templates.renderError.bind(this);
 
+    // controllers
     this.api = new WpRest(this);
     this.wait = new WaitController(this);
 
+    // init state
     this.successMessage = {
       show: false,
       message: ''
@@ -48,23 +52,36 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.logoUrl = '';
     this.logoWidth = '';
     this.loadingHeight = 'auto';
+    this.apiEndpoints = {
+      settings: 'admin-settings',
+      formFields: 'form-fields',
+      submissions: 'submissions'
+    }
+    this.formFields = [
+      {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
+      {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate'},
+      {id: 'employer', name: 'Employer', settingsProp: 'employer'}
+    ]
 
+    // register pages
     this.pages = [
       {
         id: 'pending',
         name: 'Pending Requests',
         render: this.renderPendingRequests,
-        getData: this.getPendingRequests
+        getData: [this.getListings, {id: 'pending'}]
       },
       {
         id: 'active',
         name: 'Active Listings',
-        render: this.renderActiveListings
+        render: this.renderActiveListings,
+        getData: [this.getListings, {id: 'active'}]
       },
       {
         id: 'expired',
         name: 'Expired Listings',
-        render: this.renderExpiredListings
+        render: this.renderExpiredListings,
+        getData: [this.getListings, {id: 'expired'}]
       },
       {
         id: 'settings',
@@ -89,19 +106,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       page.data = this.getPageDataTemplate(page.id);
       page.cacheKeys = [];
     });
-
     this.page = 'loading';
-
-    this.apiEndpoints = {
-      settings: 'admin-settings',
-      formFields: 'form-fields',
-      submissions: 'submissions'
-    }
-
-    this.formFields = [
-      {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
-      {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate'}
-    ]
   }
 
   firstUpdated(){
@@ -114,19 +119,28 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    * @returns
    */
   getPageDataTemplate(page){
-    if ( page === 'pending' ){
-      return {
+    if ( page === 'pending' || page === 'active' || page === 'expired' ){
+      const d = {
         totalCt: 0,
         totalPageCt: 0,
         page: 1,
         pagedSubmissions: [],
         formFields: [],
-        actions: {
-          approve: [],
-          deny: []
-        },
+        actions: {},
         assignedFormFields: {}
+      };
+      if ( page === 'pending' ) {
+        d.actions.approve = [];
+        d.actions.deny = [];
+      } else if ( page === 'active' ) {
+        d.actions.expire = [];
+        d.actions.revertToPending = [];
+        d.actions.delete = [];
+      } else if ( page === 'expired' ) {
+        d.actions.revertToPending = [];
+        d.actions.delete = [];
       }
+      return d;
     }
     if ( page === 'settings' ){
       return {
@@ -152,7 +166,12 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     const page = this.pages[i];
     if ( page.getData ) {
       this._showLoading();
-      const data = await page.getData.call(this);
+      let data;
+      if ( Array.isArray(page.getData) ) {
+        data = await page.getData[0].call(this, page.getData[1]);
+      } else {
+        data = await page.getData.call(this);
+      }
       if ( data.status === 'error' ) {
         this.page = 'error';
         return;
@@ -192,16 +211,35 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   }
 
   /**
-   * @description Retrieves the pending requests for the jobs board
-   * @param {Number} p - Page number
-   * @returns {Object}
+   * @description Returns the label for the specified listing action
+   * @param {String} action - An action from the page.data.actions object
+   * @returns {String}
    */
-  async getPendingRequests(p){
-    if ( !p ) p = 1;
-    const d = await this.api.get(this.apiEndpoints.submissions + '/pending', {page: p});
+  getListingActionLabel(action){
+    if ( action === 'approve' ) return 'Approve';
+    if ( action === 'deny' ) return 'Deny';
+    if ( action === 'expire' ) return 'Expire';
+    if ( action === 'revertToPending' ) return 'Revert to Pending';
+    if ( action === 'delete' ) return 'Delete';
+    return '';
+  }
+
+  /**
+   * @description Retrieves the listings for the jobs board by status
+   * @param {Object} kwargs - Keyword arguments
+   * @param {Number} kwargs.p - Page number
+   * @param {String} kwargs.id - Page id. i.e. 'active' or 'expired'
+   * @returns
+   */
+  async getListings(kwargs={}){
+    const p = kwargs.p || 1;
+    const id = kwargs.id || '';
+    const page = this.pages.find(p => p.id === id);
+    if ( !page ) return;
+
+    const d = await this.api.get(this.apiEndpoints.submissions + '/' + page.id, {page: p});
     if ( d.status === 'error'  ) return;
 
-    const page = this.pages.find(p => p.id === 'pending');
     if ( !page.cacheKeys.includes(d.cacheKey) ) {
       page.cacheKeys.push(d.cacheKey);
     }
@@ -222,7 +260,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   async _onListingPaginationChange(id, requestedPage){
     const page = this.pages.find(p => p.id === id);
     this._showLoading();
-    const data = await page.getData.call(this, requestedPage);
+    const data = await page.getData[0].call(this, {id, p: requestedPage});
     if ( data.status === 'error' ) {
       this.page = 'error';
       return;
@@ -246,12 +284,19 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     return d;
   }
 
-  _onPendingAction(submissionId, action){
+  /**
+   * @description Handles event fired when action select field for a job board listing is changed
+   * @param {String} id - The id of the page
+   * @param {Number} submissionId - The id of the submission
+   * @param {String} action - 'approve' or 'deny'
+   * @returns
+   */
+  _onListingAction(id, submissionId, action){
     submissionId = parseInt(submissionId);
     if ( !submissionId ) return;
 
     // update action arrays
-    const page = this.pages.find(p => p.id === 'pending');
+    const page = this.pages.find(p => p.id === id);
     Object.keys(page.data.actions).forEach(key => {
       const index = page.data.actions[key].indexOf(submissionId);
       if ( index > -1 ) {
@@ -263,6 +308,27 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     }
 
     this.requestUpdate();
+  }
+
+  /**
+   * @description Prepares submissions for display on the listing pages
+   * @param {Object} page - The page object
+   * @returns {Array} - Array of submissions with display properties
+   */
+  _prepareSubmissionsForDisplay(page){
+    const actions = Object.keys(page.data.actions);
+    return (page.data.pagedSubmissions[page.data.page - 1] || []).map(submission => {
+      submission.display = {action: ''};
+      submission.display.jobTitle = submission.meta_data[page.data.assignedFormFields.jobTitle]?.value || '';
+      submission.display.employer = submission.meta_data[page.data.assignedFormFields.employer]?.value || '';
+      for (const action of actions) {
+        if ( page.data.actions[action].includes(submission.entry_id) ) {
+          submission.display.action = action;
+          break;
+        }
+      }
+      return submission;
+    });
   }
 
   /**
@@ -320,15 +386,32 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   }
 
   /**
-   * STEVE THIS IS WHERE YOU LEFT OFF
+   * @description Handles submit event for all listing pages
    * @param {*} e
    */
   async _onListingActionSubmit(e){
     e.preventDefault();
     const page = this.getCurrentPage();
-    const payload = page.data.actions;
-    console.log(payload);
+    const payload = {actions: page.data.actions};
 
+    let hasActions = false;
+    for ( let key in payload.actions ) {
+      if ( (payload.actions[key]?.length || 0) > 0 ) {
+        hasActions = true;
+        break;
+      }
+    }
+    if ( !hasActions ) return;
+    const d = await this.api.post(this.apiEndpoints.submissions + '/' + page.id, payload);
+    if ( d.status === 'error' ) {
+      this.page = 'error';
+      return;
+    }
+
+    page.data.actions = {
+      approve: [],
+      deny: []
+    }
     this.api.clearCache();
     await this.refreshCurrentPage();
     let message = 'Save successful';
