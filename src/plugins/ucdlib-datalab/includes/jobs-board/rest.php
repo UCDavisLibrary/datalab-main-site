@@ -8,7 +8,7 @@ class UcdlibDatalabJobsBoardRest {
     $this->plugin = $jobsBoard->plugin;
     $this->jobsBoard = $jobsBoard;
     $this->routeNamespace = $this->plugin->config->slug . '/jobs-board';
-    $this->allowedJobActions = ['approve', 'deny'];
+    $this->allowedJobActions = ['approve', 'deny', 'expire', 'revertToPending', 'delete'];
 
     $this->init();
   }
@@ -130,8 +130,9 @@ class UcdlibDatalabJobsBoardRest {
     $isPost = $request->get_method() === 'POST';
     if ( $isPost ){
       $actions = $request->get_param('actions');
-      if ( !empty($actions['deny']) ){
-        $removed = $this->jobsBoard->form->deleteSubmissions( $actions['deny'] );
+      if ( !empty($actions['deny']) || !empty($actions['delete']) ){
+        $ids = empty($actions['deny']) ? $actions['delete'] : $actions['deny'];
+        $removed = $this->jobsBoard->form->deleteSubmissions( $ids );
         if (!$removed) {
           return new WP_Error( 'delete-error', 'Error deleting submissions', ['status' => 500] );
         }
@@ -171,6 +172,34 @@ class UcdlibDatalabJobsBoardRest {
               continue;
             }
             $updated = $submission->update_meta( $submission->meta_data[ $postedDateKey ]['id'], $postedDateKey, date('Y-m-d') );
+          }
+        }
+      }
+      if ( !empty( $actions['expire']) ){
+        $ids = $actions['expire'];
+        $submissions = $this->jobsBoard->form->getSubmissionsById( $ids, true );
+        foreach ($submissions as $submission) {
+          $metaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
+          if ( empty($submission->meta_data[ $metaKey ]) ){
+            continue;
+          }
+          $updated = $submission->update_meta( $submission->meta_data[ $metaKey ]['id'], $metaKey, 'expired' );
+          if ( is_wp_error($updated) ) {
+            return new WP_Error( 'update-error', 'Error updating submission', ['status' => 500] );
+          }
+        }
+      }
+      if ( !empty($actions['revertToPending']) ){
+        $ids = $actions['revertToPending'];
+        $submissions = $this->jobsBoard->form->getSubmissionsById( $ids, true );
+        foreach ($submissions as $submission) {
+          $metaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
+          if ( empty($submission->meta_data[ $metaKey ]) ){
+            continue;
+          }
+          $updated = $submission->update_meta( $submission->meta_data[ $metaKey ]['id'], $metaKey, 'pending' );
+          if ( is_wp_error($updated) ) {
+            return new WP_Error( 'update-error', 'Error updating submission', ['status' => 500] );
           }
         }
       }
