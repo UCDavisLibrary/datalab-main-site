@@ -31,6 +31,10 @@ class UcdlibDatalabConfig {
     return $this->getEnv('BUILD_TIME');
   }
 
+  public function allowSiteIndexing(){
+    return $this->getEnv('ALLOW_SITE_INDEXING') == 'true';
+  }
+
   /**
    * Return the plugin's public url with trailing slash
    * e.g. https://datalab.ucdavis.edu/wp-content/plugins/ucdlib-datalab/
