@@ -18,7 +18,6 @@ class UcdlibOidc {
 
     // if a user has these realm roles, they will be given access to the site.
     $this->allowedRealmRoles = [
-      'basic-access',
       'admin-access'
     ];
 

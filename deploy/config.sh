@@ -44,8 +44,8 @@ WPMU_DEV_DASHBOARD_VERSION='4.11.22'
 FORMS_STYLES_VERSION='v1.1.0'
 
 # Auth Defaults ( can also be overriden in .env file )
-OIDC_PROVIDER_URL='https://sandbox.auth.library.ucdavis.edu/realms/internal'
-# OIDC_PROVIDER_URL='https://auth.library.ucdavis.edu/realms/internal'
+# OIDC_PROVIDER_URL='https://sandbox.auth.library.ucdavis.edu/realms/internal'
+OIDC_PROVIDER_URL='https://auth.library.ucdavis.edu/realms/internal'
 OIDC_CLIENT_ID=$APP_SLUG
 #OIDC_CLIENT_SECRET='set this in your .env file'
 OIDC_PROTOCOL_URL=$OIDC_PROVIDER_URL/protocol/openid-connect
