@@ -155,7 +155,6 @@ if [[ $WPHB_FILE_COUNT == 0 ]]; then
     chown www-data:www-data $DESTINATION
   else
     echo "Error: $SOURCE_FILE does not exist"
-    exit 1
   fi
 else
   echo "Hummingbird cache options exist. Skipping hydration."
