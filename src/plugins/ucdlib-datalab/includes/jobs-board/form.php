@@ -4,6 +4,15 @@
  * Controller/Model for jobs board submission form
  */
 class UcdlibDatalabJobsBoardForm {
+
+  public $plugin;
+  public $jobsBoard;
+
+  public $entryTable;
+  public $entryMetaTable;
+
+  public $cacheKeys;
+
   public function __construct( $jobsBoard ){
     $this->plugin = $jobsBoard->plugin;
     $this->jobsBoard = $jobsBoard;

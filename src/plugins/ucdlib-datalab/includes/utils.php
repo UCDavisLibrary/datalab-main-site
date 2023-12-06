@@ -4,6 +4,9 @@
  * Utility functions for the site
  */
 class UcdlibDatalabUtils {
+
+  public $plugin;
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
   }
@@ -26,6 +29,9 @@ class UcdlibDatalabUtils {
     return in_array($entry, $this->activePlugins, true);
   }
 
+  /**
+   * Get the URL for the logo set in theme settings
+   */
   private $logoUrl;
   public function logoUrl(){
     if ( !empty($this->logoUrl) ) {
@@ -39,6 +45,9 @@ class UcdlibDatalabUtils {
     return $this->logoUrl;
   }
 
+  /**
+   * Get the width for the logo set in theme settings
+   */
   private $logoWidth;
   public function logoWidth(){
     if ( !empty($this->logoWidth) ) {
@@ -46,5 +55,19 @@ class UcdlibDatalabUtils {
     }
     $this->logoWidth = get_theme_mod('sf_branding_bar_logo_width', '150px');
     return $this->logoWidth;
+  }
+
+  /**
+   * Check if current page is the plugins page
+   */
+  public function isPluginsPage(){
+    if ( function_exists( 'get_current_screen' ) ) {
+      $current_screen = get_current_screen();
+      if ( !isset($current_screen->id) ) return false;
+      if ( $current_screen->id == 'plugins' ) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -1,6 +1,10 @@
 <?php
 
 class UcdlibDatalabTimber {
+
+  public $plugin;
+  public $nameSpace;
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
     $this->nameSpace = $this->plugin->config->slug;

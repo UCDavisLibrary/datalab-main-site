@@ -1,10 +1,12 @@
 <?php
 
 class UcdlibDatalabConfig {
+
+  public $slug = 'ucdlib-datalab';
+  public $plugin;
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
-
-    $this->slug = 'ucdlib-datalab';
   }
 
   private $envVariables;

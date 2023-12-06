@@ -24,7 +24,7 @@ APP_VERSION=v0.0.9.${BUILD_NUM}
 REPO_TAG=sandbox
 
 # Dependency tags/branches
-THEME_TAG='v3.7.0'
+THEME_TAG='datalab'
 WP_CORE_VERSION='6.4.1'
 MYSQL_TAG=5.7
 ADMINER_TAG=4

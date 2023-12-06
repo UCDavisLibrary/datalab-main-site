@@ -9,6 +9,15 @@ require_once( __DIR__ . '/timber.php' );
 require_once( __DIR__ . '/utils.php' );
 
 class UcdlibDatalab {
+
+  public $config;
+  public $utils;
+  public $assets;
+  public $hummingbird;
+  public $jobsBoard;
+  public $robots;
+  public $timber;
+
   public function __construct(){
 
     // load these first

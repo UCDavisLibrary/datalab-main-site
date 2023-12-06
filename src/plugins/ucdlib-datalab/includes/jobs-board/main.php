@@ -7,6 +7,23 @@ require_once( __DIR__ . '/rest.php' );
  * Jobs board functionality
  */
 class UcdlibDatalabJobsBoard {
+
+  public $plugin;
+
+  public $capability;
+  public $role;
+  public $adminMenuSlug;
+  public $optionsKeys;
+
+  public $jobStatuses;
+  public $metaKeyPrefix;
+  public $postedDateMetaKey;
+  public $jobStatusMetaKey;
+  public $jobsPerPage;
+
+  public $form;
+  public $rest;
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
 
@@ -68,7 +85,7 @@ class UcdlibDatalabJobsBoard {
    * And creates jobs_board_manager role
    */
   public function addCapability(){
-    if ( $this->isAdminMenu() ) {
+    if ( $this->plugin->utils->isPluginsPage() ) {
       // create role if it doesn't exist
       if ( !get_role( $this->role ) ) {
         add_role( $this->role, 'Jobs Board Manager', ["$this->capability" => true] );

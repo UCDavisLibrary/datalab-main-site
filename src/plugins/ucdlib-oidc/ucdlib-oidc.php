@@ -6,6 +6,12 @@
  */
 
 class UcdlibOidc {
+
+  public $allowedClientRoles;
+  public $allowedRealmRoles;
+  public $setRoleFromClaim;
+  public $oidcIsActivated;
+
   public function __construct(){
 
     // if a user has these client roles, they will be given access to the site.

@@ -4,6 +4,13 @@
  * Rest endpoint controller for jobs board
  */
 class UcdlibDatalabJobsBoardRest {
+
+  public $plugin;
+  public $jobsBoard;
+
+  public $routeNamespace;
+  public $allowedJobActions;
+
   public function __construct( $jobsBoard ){
     $this->plugin = $jobsBoard->plugin;
     $this->jobsBoard = $jobsBoard;

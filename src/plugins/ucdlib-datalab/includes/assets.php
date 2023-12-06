@@ -4,6 +4,33 @@
  * Controls the assets (JS/CSS/Images) for the plugin
  */
 class UcdlibDatalabAssets {
+
+  public $plugin;
+  public $assetsUrl;
+  public $assetsPath;
+  public $filePrefix;
+  public $cssUrl;
+  public $cssPath;
+  public $cssUrlDev;
+  public $cssPathDev;
+  public $cssUrlDist;
+  public $cssPathDist;
+  public $jsUrl;
+  public $jsPath;
+  public $jsScript;
+  public $jsEditorScript;
+  public $jsPublicUrlDev;
+  public $jsPublicPathDev;
+  public $jsPublicUrlDist;
+  public $jsPublicPathDist;
+  public $jsEditorUrlDev;
+  public $jsEditorPathDev;
+  public $jsEditorUrlDist;
+  public $jsEditorPathDist;
+  public $imgUrl;
+  public $fontsUrl;
+
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
 

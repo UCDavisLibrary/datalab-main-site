@@ -5,6 +5,8 @@
  */
 class UcdlibDatalabRobots {
 
+  public $plugin;
+
   public function __construct( $plugin ){
     $this->plugin = $plugin;
 

@@ -67,6 +67,7 @@ final class UcdlibDatalabJobsBoardAddon extends Forminator_Addon_Abstract {
 }
 
 class UcdlibDatalabJobsBoardAddonHooks extends Forminator_Addon_Form_Hooks_Abstract {
+  public $plugin;
   public function __construct( Forminator_Addon_Abstract $addon, $form_id ) {
     parent::__construct( $addon, $form_id );
     $this->plugin = $GLOBALS['ucdlibDatalab'];
