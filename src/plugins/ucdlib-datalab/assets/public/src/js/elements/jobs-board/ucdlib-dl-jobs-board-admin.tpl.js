@@ -211,7 +211,7 @@ function renderJobListingsForm(page){
           <div class="l-first">
             <div class="u-space-mb--small">
               <div>${submission.display.jobTitle} ${submission.display.employer ? ` - ${submission.display.employer}` : ''}</div>
-              <a class='pointer small-text'>View</a>
+              <a class='pointer small-text' @click=${() => this._onJobViewClick(submission)}>View</a>
             </div>
           </div>
           <div class="l-second">
@@ -241,6 +241,16 @@ function renderJobListingsForm(page){
       </div>
     </form>
   `;
+}
+
+/**
+ * @description Renders the page that displays the details of a job listing.
+ * Allows for editing of submitted fields.
+ */
+export function renderJobListingDetail(){
+  const id = 'detail';
+  const page = this.pages.find(p => p.id == id);
+  return html`<h3>Job Listing Detail</h3>`;
 }
 
 /**

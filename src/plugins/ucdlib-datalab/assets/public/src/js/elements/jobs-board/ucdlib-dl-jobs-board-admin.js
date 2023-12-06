@@ -19,6 +19,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       page: {state: true},
       successMessage: {state: true},
       loadingHeight: {state: true},
+      pageHistory: {state: true},
     }
   }
 
@@ -37,6 +38,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.renderSettings = templates.renderSettings.bind(this);
     this.renderLoading = templates.renderLoading.bind(this);
     this.renderError = templates.renderError.bind(this);
+    this.renderJobListingDetail = templates.renderJobListingDetail.bind(this);
 
     // controllers
     this.api = new WpRest(this);
@@ -61,7 +63,8 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
       {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate'},
       {id: 'employer', name: 'Employer', settingsProp: 'employer'}
-    ]
+    ];
+    this.pageHistory = [];
 
     // register pages
     this.pages = [
@@ -99,6 +102,12 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         id: 'error',
         name: 'Error',
         render: this.renderError,
+        noNav: true
+      },
+      {
+        id: 'detail',
+        name: 'Job Detail',
+        render: this.renderJobListingDetail,
         noNav: true
       }
     ];
@@ -160,10 +169,20 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    * @description Changes the page to the one specified by the index
    * Retrieves data for page if necessary
    * @param {Number} i - The index of the page to change to
+   * @param {String} id - The id of the page to change to
    * @returns
    */
-  async _onPageChange(i) {
-    const page = this.pages[i];
+  async _onPageChange(i, id) {
+    let page;
+    if ( i !== undefined ) {
+      page = this.pages[i];
+    } else if ( id ) {
+      page = this.pages.find(p => p.id === id);
+    } else {
+      return;
+    }
+    if ( !page ) return;
+
     if ( page.getData ) {
       this._showLoading();
       let data;
@@ -178,8 +197,13 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       }
       page.data = {...page.data, ...data.data};
     }
-    this.page = this.pages[i].id;
+    this.page = page.id;
     this.requestUpdate();
+  }
+
+  _onJobViewClick(submission){
+    console.log('view job', submission);
+    this._onPageChange(undefined, 'detail');
   }
 
   /**
@@ -200,6 +224,19 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    */
   getCurrentPageIndex(){
     return this.pages.findIndex(p => p.id === this.page);
+  }
+
+  /**
+   * @description Adds the specified page id to the page history
+   * @param {String} pageId - The id of the page to add to the history
+   */
+  addToPageHistory(pageId){
+    if ( !pageId ) pageId = this.page;
+    this.pageHistory.push(pageId);
+
+    if ( this.pageHistory.length > 10 ) {
+      this.pageHistory.shift();
+    }
   }
 
   /**
