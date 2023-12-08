@@ -208,6 +208,8 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     }
     if ( !page ) return;
 
+    this.addToPageHistory();
+
     if ( page.getData ) {
       this._showLoading();
       let data;
@@ -250,6 +252,28 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this._onPageChange(undefined, pageId);
   }
 
+  async _onListingSubmit(e){
+    e.preventDefault();
+    const page = this.getCurrentPage();
+    if ( !page ) return;
+    if ( !page.data?.formData?.length ) return;
+    console.log(page.data.formData);
+  }
+
+  _onListingInput(i, value){
+    const page = this.getCurrentPage();
+    if ( !page ) return;
+    if ( !page.data?.formData || !isArray(page.data.formData) || !page.data.formData[i]) return;
+    page.data.formData[i].value = value;
+    this.requestUpdate();
+  }
+
+  goToLastPage(){
+    if ( this.pageHistory.length === 0 ) return;
+    const pageId = this.pageHistory[this.pageHistory.length - 1];
+    this._onPageChange(undefined, pageId);
+  }
+
   /**
    * @description Clears cache for current page and retrieves new data
    * @returns
@@ -276,6 +300,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
    */
   addToPageHistory(pageId){
     if ( !pageId ) pageId = this.page;
+    if ( pageId === 'loading' || pageId === 'error' ) return;
     this.pageHistory.push(pageId);
 
     if ( this.pageHistory.length > 10 ) {

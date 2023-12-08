@@ -250,7 +250,24 @@ function renderJobListingsForm(page){
 export function renderJobListingDetail(){
   const id = 'detail';
   const page = this.pages.find(p => p.id == id);
-  return html`<h3>Job Listing Detail</h3>`;
+  return html`
+    <h3>Job Listing Detail</h3>
+    <form @submit=${this._onListingSubmit}>
+      ${page.data.formData.map((field, i) => html`
+        <div class="field-container">
+          <label>${field.field.label}</label>
+          <input
+            type="text"
+            .value=${field.value}
+            @input=${e => this._onListingInput(i, e.target.value)} />
+        </div>
+      `)}
+      <div>
+        <button type="submit" class='btn btn--primary'>Save</button>
+        <button type="button" class='btn btn--invert' @click=${this.goToLastPage}>Cancel</button>
+      </div>
+    </form>
+  `;
 }
 
 /**
