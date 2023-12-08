@@ -207,6 +207,8 @@ class UcdlibDatalabJobsBoardForm {
 
   /**
    * Get form fields from forminator API
+   * Returns either a sequential array of form field wrappers
+   * or if $toBasicArray is true, a sequential array of just the field objects (brief view)
    */
   public function getFormFields($formId, $toBasicArray=false){
     if ( !$this->apiAvailable() ) return [];
@@ -214,16 +216,19 @@ class UcdlibDatalabJobsBoardForm {
     if ( is_wp_error($fields) ) return [];
     if ( !$toBasicArray ) return $fields;
 
+    $fields = $this->getFieldsFromWrappers($fields);
+    $propsToExtract = [
+      'element_id' => 'id',
+      'field_label' => 'label',
+      'type' => 'type'
+    ];
     $basicFields = [];
-    foreach ($fields as $fieldWrapper) {
-      if ( !isset($fieldWrapper['fields']) ) continue;
-      foreach ($fieldWrapper['fields'] as $field) {
-        $basicFields[] = [
-          'id' => $field['element_id'],
-          'label' => $field['field_label'],
-          'type' => $field['type']
-        ];
+    foreach( $fields as $field ){
+      $basicField = [];
+      foreach( $propsToExtract as $prop => $newProp ){
+        $basicField[$newProp] = $field[$prop];
       }
+      $basicFields[] = $basicField;
     }
     return $basicFields;
   }
@@ -244,6 +249,8 @@ class UcdlibDatalabJobsBoardForm {
 
   /**
    * Get form fields for currently selected job submission form
+   * Returns either a sequential array of form field wrappers
+   * or if $toBasicArray is true, a sequential array of just the field objects (brief view)
    */
   public function getActiveFormFields($toBasicArray=false){
     $settings = $this->jobsBoard->getAdminSettings();

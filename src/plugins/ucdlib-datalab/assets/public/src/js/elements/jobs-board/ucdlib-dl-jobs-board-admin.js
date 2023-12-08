@@ -72,18 +72,21 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         id: 'pending',
         name: 'Pending Requests',
         render: this.renderPendingRequests,
+        hasListings: true,
         getData: [this.getListings, {id: 'pending'}]
       },
       {
         id: 'active',
         name: 'Active Listings',
         render: this.renderActiveListings,
+        hasListings: true,
         getData: [this.getListings, {id: 'active'}]
       },
       {
         id: 'expired',
         name: 'Expired Listings',
         render: this.renderExpiredListings,
+        hasListings: true,
         getData: [this.getListings, {id: 'expired'}]
       },
       {
@@ -162,7 +165,29 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         formFields: []
       }
     }
+    if ( page === 'detail' ){
+      return {
+        submission: {},
+        formData: []
+      }
+    }
     return {};
+  }
+
+  /**
+   * @description Returns the brief form field object for the specified field id
+   * @param {String} fieldId - The id of the field to retrieve
+   * @returns {Object} - The field object {id, label, type}.
+   * All properties will be empty strings if field is not found
+   */
+  getFieldObject(fieldId){
+    for ( const page of this.pages ){
+      if ( !page.hasListings ) continue;
+      if ( !page.data?.formFields ) continue;
+      const field = page.data.formFields.find(f => f.id === fieldId);
+      if ( field ) return field;
+    }
+    return { id: '', label: '', type: ''}
   }
 
   /**
@@ -201,9 +226,28 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.requestUpdate();
   }
 
-  _onJobViewClick(submission){
-    console.log('view job', submission);
-    this._onPageChange(undefined, 'detail');
+  _onJobViewClick(submission={}){
+    if ( !submission.meta_data ) return;
+    const pageId = 'detail';
+
+    const page = this.pages.find(p => p.id === pageId);
+    page.data.submission = submission;
+
+    const formData = [];
+    for ( const key in submission.meta_data ) {
+      const field = this.getFieldObject(key);
+      if ( !field.id ) continue;
+      formData.push({
+        field,
+        value: submission.meta_data[key].value
+      });
+    }
+    if ( formData.length === 0 ) return;
+
+    page.data.formData = formData;
+
+    console.log(page.data);
+    this._onPageChange(undefined, pageId);
   }
 
   /**

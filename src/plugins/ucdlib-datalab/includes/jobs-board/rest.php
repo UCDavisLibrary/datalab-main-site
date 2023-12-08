@@ -214,8 +214,7 @@ class UcdlibDatalabJobsBoardRest {
 
     $totalCt = $this->jobsBoard->form->getSubmissionCountByStatus( $status );
     $submissions = $this->jobsBoard->form->getSubmissionsByStatus( $status, $page );
-    $formFields = $this->jobsBoard->form->getActiveFormFields();
-    $formFields = $this->jobsBoard->form->getFieldsFromWrappers( $formFields );
+    $formFields = $this->jobsBoard->form->getActiveFormFields(true);
 
     $out = [
       'totalCt' => $totalCt,
