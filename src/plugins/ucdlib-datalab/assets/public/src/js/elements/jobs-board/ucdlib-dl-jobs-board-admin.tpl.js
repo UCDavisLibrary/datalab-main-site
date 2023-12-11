@@ -254,13 +254,7 @@ export function renderJobListingDetail(){
     <h3>Job Listing Detail</h3>
     <form @submit=${this._onListingSubmit}>
       ${page.data.formData.map((field, i) => html`
-        <div class="field-container">
-          <label>${field.field.label}</label>
-          <input
-            type="text"
-            .value=${field.value}
-            @input=${e => this._onListingInput(i, e.target.value)} />
-        </div>
+        ${renderJobListingDetailInput.call(this, field, i)}
       `)}
       <div>
         <button type="submit" class='btn btn--primary'>Save</button>
@@ -268,6 +262,29 @@ export function renderJobListingDetail(){
       </div>
     </form>
   `;
+}
+
+function renderJobListingDetailInput(field, i){
+  let input = html`
+    <input
+    type="text"
+    .value=${field.value}
+    @input=${e => this._onListingInput(i, e.target.value)} />
+  `;
+  if ( field.field.type == 'textarea' ) {
+    input = html`
+      <textarea
+        .value=${field.value}
+        rows="5"
+        @input=${e => this._onListingInput(i, e.target.value)}></textarea>
+    `;
+  }
+  return html`
+    <div class="field-container">
+      <label>${field.field.label}</label>
+      ${input}
+    </div>
+  `
 }
 
 /**
@@ -387,6 +404,17 @@ export function renderSettings(){
             </select>
           </ucd-theme-slim-select>
         </div>
+      </fieldset>
+      <fieldset>
+        <legend>Job Listing Status Settings</legend>
+        <p>The listing end date is automatically evaluated for all active and expired jobs on a daily basis.
+          If a job's end date is in the past, it will be moved to the expired listings page.
+        </p>
+        <p>Click the button below to manually evaluate all active and expired jobs. Keep this page open until the process completes.</p>
+        <button type="button" class='btn u-space-mb' @click=${this._onSettingsEvaluateListingsClick}>Evaluate Listings</button>
+        <div class='brand-textbox category-brand__background' ?hidden=${page.data.cronStatus != 'running'}>Process running...</div>
+        <div class='brand-textbox category-brand__background category-brand--farmers-market' ?hidden=${page.data.cronStatus != 'complete'}>Process complete.</div>
+        <div class='brand-textbox category-brand__background category-brand--double-decker' ?hidden=${page.data.cronStatus != 'error'}>An error occurred. Please try again later.</div>
       </fieldset>
       <button type="submit" class='btn btn--primary'>Save</button>
     </form>

@@ -57,7 +57,9 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.apiEndpoints = {
       settings: 'admin-settings',
       formFields: 'form-fields',
-      submissions: 'submissions'
+      submissions: 'submissions',
+      updateSubmissionMeta: 'update-meta',
+      statusCheck: 'run-status-check'
     }
     this.formFields = [
       {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
@@ -162,13 +164,15 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         users: [],
         addBoardManagers: [],
         removeBoardManagers: [],
-        formFields: []
+        formFields: [],
+        cronStatus: '',
       }
     }
     if ( page === 'detail' ){
       return {
         submission: {},
-        formData: []
+        formData: [],
+        updatedFormData: {}
       }
     }
     return {};
@@ -228,6 +232,11 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     this.requestUpdate();
   }
 
+  /**
+   * @description Handles event when an individual job board submission/listing is clicked
+   * @param {Object} submission - The submission object
+   * @returns
+   */
   _onJobViewClick(submission={}){
     if ( !submission.meta_data ) return;
     const pageId = 'detail';
@@ -241,33 +250,92 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       if ( !field.id ) continue;
       formData.push({
         field,
-        value: submission.meta_data[key].value
+        value: submission.meta_data[key].value,
+        id: submission.meta_data[key].id
       });
     }
     if ( formData.length === 0 ) return;
 
     page.data.formData = formData;
+    page.data.updatedFormData = {};
 
-    console.log(page.data);
     this._onPageChange(undefined, pageId);
   }
 
+  /**
+   * @description Handles event when the form on the job detail page is submitted
+   * @param {*} e - The form submit event
+   * @returns
+   */
   async _onListingSubmit(e){
     e.preventDefault();
     const page = this.getCurrentPage();
     if ( !page ) return;
     if ( !page.data?.formData?.length ) return;
-    console.log(page.data.formData);
+    const entry_id = page.data.submission.entry_id;
+    const payload = {
+      meta_data: {}
+    };
+    page.data.formData.forEach(field => {
+      if ( page.data.updatedFormData[field.field.id] ) {
+        payload.meta_data[field.field.id] = {
+          value: field.value,
+          id: field.id
+        };
+      }
+    });
+
+    this._showLoading();
+    const data = await this.api.post(`${this.apiEndpoints.updateSubmissionMeta}/${entry_id}`, payload);
+
+    if ( data.status === 'error' ) {
+      this.page = 'error';
+      return;
+    }
+
+    this.replaceSubmissionInListings(data.data);
+
+    this.goToLastPage();
+    this.showSuccessMessage('Job listing updated');
   }
 
-  _onListingInput(i, value){
-    const page = this.getCurrentPage();
-    if ( !page ) return;
-    if ( !page.data?.formData || !isArray(page.data.formData) || !page.data.formData[i]) return;
-    page.data.formData[i].value = value;
+  /**
+   * @description Replaces the specified submission data object in all page data listing arrays
+   * @param {Object} submission
+   */
+  replaceSubmissionInListings(submission){
+    this.pages.forEach(page => {
+      if ( !page.hasListings ) return;
+      const pageIndex = page.data.pagedSubmissions.findIndex(submissions => submissions.find(s => s.entry_id == submission.entry_id));
+      if ( pageIndex > -1 ) {
+        const submissionIndex = page.data.pagedSubmissions[pageIndex].findIndex(s => s.entry_id == submission.entry_id);
+        if ( submissionIndex > -1 ) {
+          page.data.pagedSubmissions[pageIndex][submissionIndex] = submission;
+        }
+      }
+    });
     this.requestUpdate();
   }
 
+  /**
+   * @description Handles event when a job detail form input is changed
+   * @param {Number} i - The index within the formData array
+   * @param {*} value
+   * @returns
+   */
+  _onListingInput(i, value){
+    const page = this.getCurrentPage();
+    if ( !page ) return;
+    if ( !page.data?.formData || !Array.isArray(page.data.formData) || !page.data.formData[i]) return;
+    page.data.formData[i].value = value;
+    page.data.updatedFormData[page.data.formData[i].field.id] = value;
+    this.requestUpdate();
+  }
+
+  /**
+   * @description Change page to the previous page in the page history
+   * @returns
+   */
   goToLastPage(){
     if ( this.pageHistory.length === 0 ) return;
     const pageId = this.pageHistory[this.pageHistory.length - 1];
@@ -447,7 +515,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     const page = this.pages.find(p => p.id === id);
 
     // remove props we dont need to send to server
-    const dropProps = ['forms', 'users', 'formFields'];
+    const dropProps = ['forms', 'users', 'formFields', 'cronStatus'];
     const payload = {...page.data};
     dropProps.forEach(prop => delete payload[prop]);
 
@@ -563,6 +631,34 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     }
     this._onPageDataInput('settings', 'selectedForm', formId)
     this._onPageDataInput('settings', 'formFields', d.data);
+  }
+
+  /**
+   * @description Handles event when button for running job status check is clicked
+   * @returns
+   */
+  async _onSettingsEvaluateListingsClick(){
+    const page = this.pages.find(p => p.id === 'settings');
+    if ( page.data.cronStatus === 'running' ) return;
+
+    page.data.cronStatus = 'running';
+    this.requestUpdate();
+    const data = await this.api.post(this.apiEndpoints.statusCheck);
+    if ( data.status === 'error' ){
+      page.data.cronStatus = 'error';
+    } else if ( data.data.status === 'running' ) {
+      page.data.cronStatus = 'running';
+    } else {
+      page.data.cronStatus = 'complete';
+
+      setTimeout(() => {
+        page.data.cronStatus = '';
+        this.requestUpdate();
+      }, 10000);
+
+    }
+    this.requestUpdate();
+    this.api.clearCache();
   }
 
   /**

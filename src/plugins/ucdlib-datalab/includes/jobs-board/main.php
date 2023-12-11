@@ -20,6 +20,7 @@ class UcdlibDatalabJobsBoard {
   public $postedDateMetaKey;
   public $jobStatusMetaKey;
   public $jobsPerPage;
+  public $cronJobHook;
 
   public $form;
   public $rest;
@@ -33,6 +34,7 @@ class UcdlibDatalabJobsBoard {
     $this->optionsKeys = [
       'settings' => $this->plugin->config->slug . '_jobs_board_settings'
     ];
+    $this->cronJobHook = $this->plugin->config->slug . '_jobs_board';
 
     $this->jobStatuses = [
       'pending' => ['slug' => 'pending', 'label' => 'Pending'],
@@ -53,7 +55,21 @@ class UcdlibDatalabJobsBoard {
 
     add_action('current_screen', [$this, 'addCapability']);
     add_action('admin_menu', [$this, 'addMenuItem']);
+
+    // schedule cron job
+    add_action( 'wp', [$this, 'scheduleCronJob'] );
+    add_action( $this->cronJobHook, [$this->form, 'updateStatusForAllSubmissions'] );
   }
+
+  /**
+   * Schedule cron job
+   */
+  public function scheduleCronJob(){
+    if ( !wp_next_scheduled( $this->cronJobHook ) ) {
+      wp_schedule_event( time(), 'daily', $this->cronJobHook );
+    }
+  }
+
 
   public function updateAdminSettings( $data ){
     $settings = $this->getAdminSettings();

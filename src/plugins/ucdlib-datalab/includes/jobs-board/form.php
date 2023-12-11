@@ -60,6 +60,48 @@ class UcdlibDatalabJobsBoardForm {
   }
 
   /**
+   * Check if a job submission entry has a given meta id
+   */
+  public function submissionHasMeta( $entryId, $metaId ){
+    if ( !$this->apiAvailable() ) return false;
+
+    // ensure submission is for the selected form
+    $submission = $this->getSubmissionsById( [$entryId], true );
+    if ( empty($submission) ) return false;
+    $submission = $submission[0];
+
+    global $wpdb;
+    $sql = "SELECT COUNT(*) FROM {$this->entryMetaTable}
+      WHERE entry_id = %d AND meta_id = %d";
+
+    $sql = $wpdb->prepare( $sql, $entryId, $metaId );
+    $count = $wpdb->get_var( $sql );
+    $count = intval( $count );
+
+    return $count > 0;
+  }
+
+  /**
+   * Update a job submission entry meta value
+   */
+  public function updateSubmissionMeta($entryId, $metaId, $metaKey, $value, $validate=true){
+    if ( !$this->apiAvailable() ) return false;
+
+    // ensure submission is for the selected form
+    $submission = $this->getSubmissionsById( [$entryId], true );
+    if ( empty($submission) ) return false;
+    $submission = $submission[0];
+
+    if ( $validate ){
+      $exists = $this->submissionHasMeta( $entryId, $metaId );
+      if ( empty($meta) ) return false;
+    }
+
+    $submission->update_meta( $metaId, $metaKey, $value );
+
+  }
+
+  /**
    * Get the total number of job submission entries by status
    */
   public function getSubmissionCountByStatus($status){
@@ -102,6 +144,67 @@ class UcdlibDatalabJobsBoardForm {
   public function getSubmissionsByStatus($status, $page=1){
     $ids = $this->getSubmissionIdsByStatus($status, $page);
     return $this->getSubmissionsById($ids);
+  }
+
+  /**
+   * Maybe update statuses for all job submissions based on listing expiration date
+   * A cron job should be set up to run this method daily
+   * Is resource intensive.
+   */
+  public function updateStatusForAllSubmissions(){
+    if ( !$this->apiAvailable() ) return false;
+
+    // get all entries
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return false;
+    $formId = $settings['selectedForm'];
+    $entries = Forminator_API::get_entries( $formId );
+    if ( is_wp_error($entries) ) return false;
+
+    foreach( $entries as $entry ){
+      $this->updateStatusFromDate( $entry );
+    }
+  }
+
+  /**
+   * Update job submission status based on listing expiration date
+   */
+  public function updateStatusFromDate( $submission ){
+    if ( !$this->apiAvailable() ) return false;
+    if ( !$this->jobsBoard->listingExpirationField() ) return false;
+
+    // get submission if id is passed
+    if ( is_numeric($submission) ) {
+      $submission = $this->getSubmissionsById( [$submission], true );
+      if ( empty($submission) ) return false;
+      $submission = $submission[0];
+    }
+    if ( empty($submission->meta_data[ $this->jobsBoard->listingExpirationField() ]) ) {
+      return;
+    }
+
+    // get current status, bail if pending
+    $statusKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
+    $status = $submission->get_meta( $statusKey );
+    if ( empty($status) ) return false;
+    if ( $status == 'pending' ) return false;
+
+    // get new status, bail if no change
+    $expirationDate = $submission->meta_data[ $this->jobsBoard->listingExpirationField() ];
+    $expirationDateStamp = strtotime( $expirationDate['value'] );
+    if ( !$expirationDateStamp ) {
+      return;
+    }
+    if ( $expirationDateStamp < time() ) {
+      $newStatus = 'expired';
+    } else {
+      $newStatus = 'active';
+    }
+    if ( $newStatus == $status ) return false;
+
+    // update status
+    $updated = $submission->update_meta( $submission->meta_data[ $statusKey ]['id'], $statusKey, $newStatus );
+
   }
 
   /**

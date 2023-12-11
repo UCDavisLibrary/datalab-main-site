@@ -41,9 +41,33 @@ class UcdlibDatalabJobsBoardRest {
       'callback' => [$this, 'saveAdminSettings'],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
+    register_rest_route( $this->routeNamespace, '/run-status-check', [
+      'methods' => 'POST',
+      'callback' => [$this, 'runStatusCheck'],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
+    ]);
     register_rest_route( $this->routeNamespace, '/form-fields/(?P<id>[\d]+)', [
       'methods' => 'GET',
       'callback' => [$this, 'getFormFields'],
+      'permission_callback' => [$this, 'routePermissionCallbackManager']
+    ]);
+    register_rest_route( $this->routeNamespace, '/update-meta/(?P<id>[\d]+)', [
+      'methods' => 'POST',
+      'callback' => [$this, 'updateSubmissionMeta'],
+      'args' => [
+        'meta_data' => [
+          'required' => true,
+          'validate_callback' => function($param, $request, $key){
+            return is_array($param);
+          }
+        ],
+        'id' => [
+          'required' => true,
+          'validate_callback' => function($param, $request, $key){
+            return is_numeric($param);
+          }
+        ]
+        ],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
     register_rest_route( $this->routeNamespace, '/submissions/(?P<status>[a-zA-Z0-9-]+)', [
@@ -77,6 +101,23 @@ class UcdlibDatalabJobsBoardRest {
       ],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
+  }
+
+  public function runStatusCheck( $request ){
+    $transientKey = $this->jobsBoard->plugin->config->slug . '-status-check';
+    $transient = get_transient( $transientKey );
+    if ( $transient ) {
+      return [
+        'status' => 'running'
+      ];
+    }
+    set_transient( $transientKey, true);
+    $this->jobsBoard->form->updateStatusForAllSubmissions();
+    delete_transient( $transientKey );
+
+    return [
+      'status' => 'complete'
+    ];
   }
 
   /**
@@ -117,6 +158,45 @@ class UcdlibDatalabJobsBoardRest {
       $hasAllowedAction = true;
     }
     return $hasAllowedAction;
+  }
+
+  /**
+   * Callback for POST /update-meta/{id}
+   */
+  public function updateSubmissionMeta( $request ){
+    $metaData = $request->get_param('meta_data');
+    $id = $request->get_param('id');
+
+    $missingFields = [];
+    foreach( $metaData as $metaKey => $value ){
+      if ( !isset($value['value']) ) continue;
+      if ( !isset($value['id']) ) {
+        $missingFields[] = $metaKey;
+        continue;
+      }
+      if ( !$this->jobsBoard->form->submissionHasMeta( $id, $value['id'] ) ){
+        $missingFields[] = $metaKey;
+      }
+    }
+    if ( count($missingFields) ) {
+      return new WP_Error( 'missing-fields', 'Missing fields', ['status' => 400, 'missingFields' => $missingFields] );
+    }
+    foreach( $metaData as $metaKey => $value ){
+      $v = isset($value['value']) ? $value['value'] : '';
+      $this->jobsBoard->form->updateSubmissionMeta( $id, $value['id'], $metaKey, $v, false );
+    }
+
+    // maybe update status
+    $this->jobsBoard->form->updateStatusFromDate( $id );
+
+    // return submission
+    $submission = $this->jobsBoard->form->getSubmissionsById( [$id], true );
+    if ( empty($submission) ) {
+      return new WP_Error( 'submission-not-found', 'Submission not found', ['status' => 404] );
+    }
+    $submission = $submission[0];
+    return $submission;
+
   }
 
   /**
