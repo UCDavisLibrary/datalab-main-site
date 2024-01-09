@@ -8,6 +8,10 @@ class DynamicScriptLoader {
       {
         name: 'jobs-board-admin',
         cssQuery: ['ucdlib-dl-jobs-board-admin']
+      },
+      {
+        name: 'jobs-board',
+        cssQuery: ['ucdlib-dl-jobs-board']
       }
     ];
   }
@@ -34,6 +38,8 @@ class DynamicScriptLoader {
 
     if ( bundleName == 'jobs-board-admin' ){
       this.loaded[bundleName] = import(/* webpackChunkName: "jobs-board-admin" */ './elements/jobs-board/ucdlib-dl-jobs-board-admin.js');
+    } else if ( bundleName == 'jobs-board' ){
+      this.loaded[bundleName] = import(/* webpackChunkName: "jobs-board" */ './elements/jobs-board/ucdlib-dl-jobs-board.js');
     }
     return this.loaded[bundleName]
   }

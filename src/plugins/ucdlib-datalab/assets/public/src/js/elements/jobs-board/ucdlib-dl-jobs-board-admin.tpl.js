@@ -411,7 +411,7 @@ export function renderSettings(){
           If a job's end date is in the past, it will be moved to the expired listings page.
         </p>
         <p>Click the button below to manually evaluate all active and expired jobs. Keep this page open until the process completes.</p>
-        <button type="button" class='btn u-space-mb' @click=${this._onSettingsEvaluateListingsClick}>Evaluate Listings</button>
+        <button type="button" class='btn u-space-mb' @click=${this._onSettingsEvaluateListingsClick}>Check Job Listing Statuses</button>
         <div class='brand-textbox category-brand__background' ?hidden=${page.data.cronStatus != 'running'}>Process running...</div>
         <div class='brand-textbox category-brand__background category-brand--farmers-market' ?hidden=${page.data.cronStatus != 'complete'}>Process complete.</div>
         <div class='brand-textbox category-brand__background category-brand--double-decker' ?hidden=${page.data.cronStatus != 'error'}>An error occurred. Please try again later.</div>

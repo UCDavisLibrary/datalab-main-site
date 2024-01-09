@@ -101,6 +101,26 @@ class UcdlibDatalabJobsBoardRest {
       ],
       'permission_callback' => [$this, 'routePermissionCallbackManager']
     ]);
+
+    register_rest_route( $this->routeNamespace, '/jobs', [
+      'methods' => 'GET',
+      'callback' => [$this, 'getJobs'],
+      'args' => [
+        'page' => [
+          'required' => false,
+          'validate_callback' => function($param, $request, $key){
+            return is_numeric($param);
+          }
+        ]
+      ],
+      'permission_callback' => [$this, 'routePermissionCallbackPublic']
+    ]);
+  }
+
+  public function getJobs( $request ){
+    $page = $request->get_param('page') ?: 1;
+    $jobs = ['hello world'];
+    return $jobs;
   }
 
   public function runStatusCheck( $request ){
