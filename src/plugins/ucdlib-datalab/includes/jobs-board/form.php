@@ -230,6 +230,65 @@ class UcdlibDatalabJobsBoardForm {
     return $submissions;
   }
 
+  public function queryJobs($args, &$count){
+    global $wpdb;
+    $count = 0;
+    $entries = [];
+    $statusMetaKey = $this->jobsBoard->metaKeyPrefix . $this->jobsBoard->jobStatusMetaKey;
+
+    if ( !isset($args['page']) ) $args['page'] = 1;
+    if ( !isset($args['status']) ) $args['status'] = 'active';
+
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return $entries;
+    $formId = $settings['selectedForm'];
+
+    $offset = ($args['page'] - 1) * $this->jobsBoard->jobsPerPage;
+
+    // construct where clause
+    $secondJoin = '';
+    $where = $wpdb->prepare( 'WHERE em.meta_key = %s AND em.meta_value = %s', $statusMetaKey, $args['status'] );
+    $where .= $wpdb->prepare( ' AND e.form_id = %d', esc_sql( $formId ) );
+    $where .= $wpdb->prepare( ' AND e.is_spam = %s', esc_sql( 0 ) );
+    if ( isset( $args['search'] ) ) {
+			$where .= $wpdb->prepare( ' AND em2.meta_value LIKE %s', '%' . $wpdb->esc_like( $args['search'] ) . '%' );
+      $secondJoin = "INNER JOIN {$this->entryMetaTable} em2 ON e.entry_id = em2.entry_id";
+		}
+
+    $sqlCount = "SELECT count(DISTINCT e.entry_id) as total_entries
+      FROM {$this->entryTable} e
+      INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
+      {$secondJoin}
+      {$where}";
+
+    $count = intval( $wpdb->get_var( $sqlCount ) );
+
+    if ( $count ) {
+      $groupBy = 'GROUP BY e.entry_id';
+      $orderBy = 'ORDER BY e.entry_id';
+      $order = 'DESC';
+      $limit = $wpdb->prepare( 'LIMIT %d, %d', $offset, $this->jobsBoard->jobsPerPage );
+
+      $sql = "SELECT e.entry_id AS entry_id
+        FROM {$this->entryTable} e
+        INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
+        {$secondJoin}
+        {$where}
+        {$groupBy}
+        {$orderBy} {$order}
+        {$limit}";
+
+      $results = $wpdb->get_results( $sql );
+
+      foreach ( $results as $result ) {
+				$entries[] = new Forminator_Form_Entry_Model( $result->entry_id );
+			}
+
+    }
+
+    return $entries;
+  }
+
   /**
    * Delete job submission entries by id
    */

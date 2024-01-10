@@ -44,7 +44,7 @@ class UcdlibDatalabJobsBoard {
     $this->metaKeyPrefix = 'forminator_addon_dl-jb_';
     $this->postedDateMetaKey = 'posted-date';
     $this->jobStatusMetaKey ='job-status';
-    $this->jobsPerPage = 10;
+    $this->jobsPerPage = 2;
 
     $this->init();
   }

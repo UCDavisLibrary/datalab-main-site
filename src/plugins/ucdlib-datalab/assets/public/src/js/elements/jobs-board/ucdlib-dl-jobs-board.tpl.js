@@ -10,7 +10,25 @@ export function styles() {
   return [elementStyles];
 }
 
+// main render function for element
 export function render() {
-return html`
-  <p>jobs and stuff</p>
-`;}
+  if ( this.fetchStatus === 'loading' ) {
+    return renderLoading.call(this);
+  }
+  if ( this.fetchStatus === 'loaded' ) {
+    return renderLoaded.call(this);
+  }
+  return renderError.call(this);
+}
+
+function renderLoaded(){
+  return html`<p>loaded</p>`
+}
+
+function renderLoading(){
+  return html`<p>loading</p>`
+}
+
+function renderError(){
+  return html`<p>error!</p>`
+}

@@ -111,7 +111,13 @@ class UcdlibDatalabJobsBoardRest {
           'validate_callback' => function($param, $request, $key){
             return is_numeric($param);
           }
-        ]
+        ],
+        'search' => [
+          'required' => false,
+          'validate_callback' => function($param, $request, $key){
+            return is_string($param);
+          }
+        ],
       ],
       'permission_callback' => [$this, 'routePermissionCallbackPublic']
     ]);
@@ -119,8 +125,27 @@ class UcdlibDatalabJobsBoardRest {
 
   public function getJobs( $request ){
     $page = $request->get_param('page') ?: 1;
-    $status = 'active';
-    return ['hello world'];
+    $search = $request->get_param('search');
+    $search = $search ? sanitize_text_field( $search ) : '';
+
+    $settings = $this->jobsBoard->getAdminSettings();
+    $totalCt = 0;
+    $query = [
+      'page' => $request->get_param('page') ?: 1
+    ];
+    if ( $search ) {
+      $query['search'] = $search;
+    }
+    $jobs = $this->jobsBoard->form->queryJobs( $query, $totalCt );
+
+    $out = [
+      'fieldOrder' => $settings['publicFieldDisplayOrder'],
+      'totalCt' => $totalCt,
+      'totalPageCt' => ceil( $totalCt / $this->jobsBoard->jobsPerPage ),
+      'jobs' => $jobs,
+      'assignedFormFields' => $settings['selectedFormFields']
+    ];
+    return $out;
   }
 
   public function runStatusCheck( $request ){
