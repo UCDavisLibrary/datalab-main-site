@@ -161,6 +161,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
         forms: [],
         selectedForm: '',
         selectedFormFields: {},
+        publicFieldDisplayOrder: {},
         users: [],
         addBoardManagers: [],
         removeBoardManagers: [],
@@ -613,6 +614,53 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     const page = this.pages.find(p => p.id === 'settings');
     page.data.selectedFormFields[field] = value;
     this.requestUpdate();
+  }
+
+  /**
+   * @description Handles even when the display order of a job board form field is changed
+   * @param {*} field - The id of the job board form field
+   * @param {*} value - The id of the submission form field
+   * @returns
+   */
+  _onSettingsFormFieldOrderChange(field, value){
+    const page = this.pages.find(p => p.id === 'settings');
+    value = parseInt(value);
+    if ( isNaN(value) ) return;
+    page.data.publicFieldDisplayOrder[field] = value;
+    this.requestUpdate();
+  }
+
+  /**
+   * @description Handles event when the display checkbox for a job board form field is toggled
+   * @param {*} field - The id of the job board form field
+   */
+  _onSettingsFormFieldDisplayToggle(field){
+    const page = this.pages.find(p => p.id === 'settings');
+    const currentValue = page.data.publicFieldDisplayOrder[field] === undefined ? 0 : page.data.publicFieldDisplayOrder[field];
+    const newValue = currentValue >= 0 ? -1 : 0;
+    page.data.publicFieldDisplayOrder[field] = newValue;
+    this.requestUpdate();
+  }
+
+  /**
+   * @description Returns data structure needed for rendering the field display order settings section
+   */
+  _fieldDisplayOrderArray(){
+    const page = this.pages.find(p => p.id === 'settings');
+    const fields = [];
+    page.data.formFields.forEach(field => {
+      const skipField = Object.values(page.data.selectedFormFields).includes(field.id);
+      if ( skipField ) return;
+      const f = {
+        id: field.id,
+        label: field.label,
+        order: page.data.publicFieldDisplayOrder[field.id] === undefined ? 0 : page.data.publicFieldDisplayOrder[field.id]
+      }
+      f.hide = f.order < 0;
+      fields.push(f);
+    });
+
+    return fields;
   }
 
   /**

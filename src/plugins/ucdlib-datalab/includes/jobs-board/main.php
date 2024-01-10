@@ -80,10 +80,14 @@ class UcdlibDatalabJobsBoard {
   public function getAdminSettings(){
     $settings = get_option( $this->optionsKeys['settings'], [] );
 
-    // ensure we have associative arrays where needed
+    // ensure we have associative arrays where needed, for php to json conversion
     if ( empty($settings['selectedFormFields']) ){
       $settings['selectedFormFields'] = ['dummyField' => ''];
     }
+    if ( empty($settings['publicFieldDisplayOrder']) ){
+      $settings['publicFieldDisplayOrder'] = ['dummyField' => ''];
+    }
+
 
     return $settings;
   }

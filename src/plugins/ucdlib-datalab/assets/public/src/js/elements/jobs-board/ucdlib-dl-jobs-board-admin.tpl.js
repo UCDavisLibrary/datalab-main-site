@@ -265,6 +265,7 @@ export function renderJobListingDetail(){
 }
 
 function renderJobListingDetailInput(field, i){
+  if ( !field.field.label ) return html``;
   let input = html`
     <input
     type="text"
@@ -331,7 +332,7 @@ export function renderSettings(){
     <form @submit=${this._onSettingsSubmit}>
       <h3>Settings</h3>
       <fieldset>
-        <legend>Submission Form Settings</legend>
+        <legend>Submission Form</legend>
         <div class="field-container">
           <label>Form</label>
           <select
@@ -345,7 +346,9 @@ export function renderSettings(){
         </div>
         <div>
           <label>Job Submission Form Fields</label>
-          <p class='u-space-mb--flush'>Match the following fields to the corresponding job submission form field.</p>
+          <p class='u-space-mb--flush'>
+            The following fields must be part of the job submission form.
+            Match them to their corresponding job submission form field.</p>
           <div class='o-box'>
             ${this.formFields.map(field => html`
               <div class='field-container'>
@@ -364,7 +367,40 @@ export function renderSettings(){
         </div>
       </fieldset>
       <fieldset>
-        <legend>User Settings</legend>
+        <legend>Public Display</legend>
+        <label>Field Visibility and Order</label>
+        <p class='u-space-mb--flush'>Toggle whether a job field is displayed to the public and the order.</p>
+        <div class='o-box'>
+          ${this._fieldDisplayOrderArray().map(field => html`
+            <div class='l-3col u-space-mb'>
+              <div class='l-first'><label>${field.label}</label></div>
+              <div class='l-second'>
+                <select
+                  class='u-space-mb--small'
+                  @input=${e => this._onSettingsFormFieldDisplayToggle(field.id)}
+                  .value=${field.hide ? '0' : '1'}
+                >
+                  <option value="1" ?selected=${!field.hide}>Show</option>
+                  <option value="0" ?selected=${field.hide}>Hide</option>
+                </select>
+              </div>
+              <div class='l-third'>
+                <div ?hidden=${field.hide}>
+                  <input
+                    class='u-space-mb--small'
+                    type="number"
+                    min="-1"
+                    @input=${e => this._onSettingsFormFieldOrderChange(field.id, e.target.value)}
+                    .value=${field.order}
+                  />
+                </div>
+              </div>
+            </div>
+          `)}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Users</legend>
         <label>Jobs Board Managers</label>
         <p>These users will be able to approve or reject job submissions.</p>
         <div class='board-manager-list u-space-mb'>

@@ -119,8 +119,8 @@ class UcdlibDatalabJobsBoardRest {
 
   public function getJobs( $request ){
     $page = $request->get_param('page') ?: 1;
-    $jobs = ['hello world'];
-    return $jobs;
+    $status = 'active';
+    return ['hello world'];
   }
 
   public function runStatusCheck( $request ){
@@ -339,7 +339,7 @@ class UcdlibDatalabJobsBoardRest {
 
     // update settings
     $settings = [];
-    $keys = ['selectedForm', 'selectedFormFields'];
+    $keys = ['selectedForm', 'selectedFormFields', 'publicFieldDisplayOrder'];
     foreach( $keys as $key ){
       if ( isset($data[$key]) ) {
         $settings[$key] = $data[$key];
