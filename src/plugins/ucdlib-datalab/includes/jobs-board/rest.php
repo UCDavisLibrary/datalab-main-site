@@ -137,13 +137,15 @@ class UcdlibDatalabJobsBoardRest {
       $query['search'] = $search;
     }
     $jobs = $this->jobsBoard->form->queryJobs( $query, $totalCt );
+    $formFields = $this->jobsBoard->form->getActiveFormFields(true);
 
     $out = [
       'fieldOrder' => $settings['publicFieldDisplayOrder'],
       'totalCt' => $totalCt,
       'totalPageCt' => ceil( $totalCt / $this->jobsBoard->jobsPerPage ),
       'jobs' => $jobs,
-      'assignedFormFields' => $settings['selectedFormFields']
+      'assignedFormFields' => $settings['selectedFormFields'],
+      'formFields' => $formFields
     ];
     return $out;
   }

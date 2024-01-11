@@ -2,7 +2,11 @@ import { LitElement } from 'lit';
 import {render, styles} from "./ucdlib-dl-jobs-board.tpl.js";
 
 import WpRest from '../../controllers/wp-rest.js';
+import { WaitController } from '@ucd-lib/theme-elements/utils/controllers/index.js';
 
+/**
+ * @description Element that displays list of approved jobs to the public
+ */
 export default class UcdlibDlJobsBoard extends LitElement {
 
   static get properties() {
@@ -10,8 +14,11 @@ export default class UcdlibDlJobsBoard extends LitElement {
       searchText: { type: String, attribute: 'search-text' },
       currentPage: { type: Number, attribute: 'current-page' },
       restNamespace: { type: String, attribute: 'rest-namespace' },
+      loadingHeight: { type: String, attribute: 'loading-height' },
+      jobs: { state: true },
       totalPages: { state: true },
       fetchStatus: { state: true },
+      expandedJobs: { state: true }
     }
   }
 
@@ -27,10 +34,14 @@ export default class UcdlibDlJobsBoard extends LitElement {
     this.searchText = '';
     this.currentPage = 1;
     this.totalPages = 1;
+    this.jobs = [];
     this.fetchStatus = 'loading';
+    this.loadingHeight = '200px';
+    this.expandedJobs = [];
 
     // controllers
     this.api = new WpRest(this);
+    this.wait = new WaitController(this);
   }
 
   async connectedCallback() {
@@ -38,6 +49,9 @@ export default class UcdlibDlJobsBoard extends LitElement {
     await this.getJobs();
   }
 
+  /**
+   * @description Get active jobs from api for current page and search text
+   */
   async getJobs(){
     this.fetchStatus = 'loading';
 
@@ -56,13 +70,130 @@ export default class UcdlibDlJobsBoard extends LitElement {
     }
 
     // extract data
-    this.totalPages = response.data.totalPages;
-    const assignedFormFields = response.data.assignedFormFields;
-    const fieldOrder = response.data.fieldOrder;
-
-
+    this.totalPages = response.data.totalPageCt || 1;
+    this.jobs = this._transformJobs(response);
 
     this.fetchStatus = 'loaded';
+    await this.setLoadingHeight();
+  }
+
+  /**
+   * @description Handle search input
+   */
+  _onSearchInput(e){
+    this.searchText = e.target.value;
+
+    if ( this.searchTimeout ) {
+      clearTimeout(this.searchTimeout);
+    }
+    this.searchTimeout = setTimeout(async () => {
+      await this._onSearchSubmit();
+      const searchInput = this.renderRoot.querySelector('#search');
+      if ( searchInput ) {
+        searchInput.focus();
+      }
+    }, 500);
+  }
+
+  /**
+   * @description Handle search submit
+   */
+  async _onSearchSubmit(e){
+    if ( e ) {
+      e.preventDefault();
+    }
+    this.expandedJobs = [];
+    this.currentPage = 1;
+    await this.getJobs();
+  }
+
+  /**
+   * @description Set the height of the loading container to the height of the loaded content
+   */
+  async setLoadingHeight(){
+    await this.wait.waitForUpdate();
+    await this.wait.waitForFrames(3);
+    const container = this.renderRoot.querySelector('#loaded');
+    if ( !container ) return;
+    const height = container.offsetHeight;
+    this.loadingHeight = `${height}px`;
+  }
+
+  /**
+   * @description Handle pagination change
+   */
+  _onPageChange(e){
+    if ( this.fetchStatus !== 'loaded' ) return;
+    if ( e.detail.page == this.currentPage ) return;
+    this.currentPage = e.detail.page;
+    this.getJobs();
+  }
+
+  /**
+   * @description Handle click by user - controls visibility for job details
+   * @param {Number} id - id of job
+   */
+  _onJobDetailsToggle(id){
+    if ( this.expandedJobs.includes(id) ) {
+      this.expandedJobs = this.expandedJobs.filter(j => j !== id);
+    } else {
+      this.expandedJobs.push(id);
+    }
+    this.requestUpdate();
+  }
+
+  /**
+   * @description Transform the response from the api into the format needed for this component
+   * @param {*} response
+   */
+  _transformJobs(response){
+    const assignedFormFields = response.data.assignedFormFields;
+    const requiredFormFields = ['jobTitle', 'listingEndDate', 'employer'];
+    for (const field of requiredFormFields) {
+      if ( !assignedFormFields[field] ) {
+        console.error(`Missing required field '${field}' mapping. Please check the plugin settings.`);
+        return [];
+      }
+    }
+    const adSkipFields = Object.values(assignedFormFields);
+    const formFields = response.data.formFields;
+    const fieldOrder = response.data.fieldOrder;
+
+    const output = [];
+    response.data.jobs.forEach(job => {
+      const j = {
+        id: job.entry_id,
+        title: job.meta_data?.[assignedFormFields.jobTitle]?.value || '',
+        employer: job.meta_data?.[assignedFormFields.employer]?.value || '',
+        endDate: job.meta_data?.[assignedFormFields.listingEndDate]?.value || '',
+        posted: job.meta_data?.['forminator_addon_dl-jb_posted-date']?.value || '',
+        additionalFields: []
+      }
+
+      for (const fid in job.meta_data) {
+        if ( adSkipFields.includes(fid) ) continue;
+
+        let field = formFields.find(f => f.id == fid);
+        if ( !field ) continue;
+        field = {...field};
+        field.value = job.meta_data[fid].value || '';
+
+        const order = fieldOrder[fid];
+        if ( order !== undefined && order < 0 ) continue;
+        field.order = order || 0;
+
+        j.additionalFields.push(field);
+        j.additionalFields.sort((a,b) => {
+          if ( a.order < b.order ) return -1;
+          if ( a.order > b.order ) return 1;
+          return 0;
+        });
+      }
+
+      output.push(j);
+    });
+
+    return output;
   }
 
 }
