@@ -357,8 +357,8 @@ export function renderSettings(){
                   @input=${e => this._onSettingsFormFieldSelect(field.settingsProp, e.target.value)}
                   .value=${page.data.selectedFormFields[field.settingsProp]}>
                   <option value="">Select a form field</option>
-                  ${page.data.formFields.map(formField => html`
-                    <option value=${formField.id} ?selected=${page.data.selectedFormFields[field.settingsProp] == formField.id}>${formField.label}</option>
+                  ${this.filterFields(page.data.formFields).map(formField => html`
+                    <option value=${formField.id} ?selected=${page.data.selectedFormFields[field.settingsProp] == formField.id}>${formField.label || formField.id}</option>
                   `)}
                 </select>
               </div>
@@ -373,7 +373,7 @@ export function renderSettings(){
         <div class='o-box'>
           ${this._fieldDisplayOrderArray().map(field => html`
             <div class='l-3col u-space-mb'>
-              <div class='l-first'><label>${field.label}</label></div>
+              <div class='l-first'><label>${field.label || field.id}</label></div>
               <div class='l-second'>
                 <select
                   class='u-space-mb--small'

@@ -648,7 +648,7 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   _fieldDisplayOrderArray(){
     const page = this.pages.find(p => p.id === 'settings');
     const fields = [];
-    page.data.formFields.forEach(field => {
+    this.filterFields(page.data.formFields).forEach(field => {
       const skipField = Object.values(page.data.selectedFormFields).includes(field.id);
       if ( skipField ) return;
       const f = {
@@ -661,6 +661,18 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
     });
 
     return fields;
+  }
+
+  /**
+   * @description Filter out fields that generally shouldn't be displayed like layout fields
+   */
+  filterFields(fields){
+    if ( !Array.isArray(fields) ) return [];
+    return fields.filter(f => {
+      const skipTypes = ['captcha', 'page-break'];
+      if ( skipTypes.includes(f.type) ) return false;
+      return true;
+    });
   }
 
   /**
