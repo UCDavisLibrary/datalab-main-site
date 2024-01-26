@@ -2,6 +2,8 @@
 
 Repository for the main UC Davis Datalab website, running Wordpress with the UC Davis Library theme.
 
+https://www.figma.com/file/chC7MLHfapKSRsTXFWNLRs/DataLab?type=design&node-id=371-502&mode=design
+
 ## Deployment
 
 ## Development
