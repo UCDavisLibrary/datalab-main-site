@@ -12,7 +12,8 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "@ucd-lib/brand-theme-editor": "file:../../../../../repositories/ucdlib-theme-wp/src/editor"
+    "@ucd-lib/brand-theme-editor": "file:../../../../../repositories/ucdlib-theme-wp/src/editor",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@wordpress/scripts": "^23.7.2"
