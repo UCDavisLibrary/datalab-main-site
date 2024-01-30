@@ -26,7 +26,10 @@ class UcdlibDatalabProjects {
       'showLink' => 'showLink'
     ]
   ];
+
+  // settings. sorry, no admin interface for these yet
   public $resultsPerPage = 10;
+  public $projectsMenuId = '91'; // use dev tools on appearance->menus to find this id
 
   public $approach;
   public $project;

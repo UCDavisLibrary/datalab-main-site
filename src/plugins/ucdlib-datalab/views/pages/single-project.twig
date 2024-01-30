@@ -1,0 +1,47 @@
+{% extends getUcdTemplate('base') %}
+
+{% block content_container %}
+  <div class="l-container l-basic--flipped">
+    <div class="l-content">
+      <h2>Project Overview</h2>
+      <div class='u-space-mb'>
+        {{ _self.taxList('Theme', post.themes) }}
+        {{ _self.taxList('Approach', post.approaches) }}
+        {% apply spaceless %}
+          <div>
+            <span class='meta-label'>Status: </span>
+            <span>{{post.projectStatusObject.label}}</span>
+            {% if post.projectStatusObject.endYear %}
+              <span> ({{post.projectStatusObject.endYear}})</span>
+            {% endif %}
+          </div>
+        {% endapply %}
+      </div>
+      {% if post.content %}
+        {{post.content}}
+      {% elseif post.post_excerpt %}
+        {{post.post_excerpt}}
+      {% endif %}
+    </div>
+
+    <div class="l-sidebar-second">
+      {% if sidebar %}
+        {{sidebar}}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% macro taxList(label, tax) %}
+  {% if tax %}
+    {% apply spaceless %}
+    <div>
+      <span class='meta-label'>{{label}}: </span>
+      {% for t in tax %}
+        <span>{{t.name}}</span>
+        {% if not loop.last %}<span>, </span>{% endif %}
+      {% endfor %}
+    </div>
+    {% endapply %}
+  {% endif %}
+{% endmacro %}

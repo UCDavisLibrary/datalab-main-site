@@ -1,0 +1,8 @@
+{% if attributes.post.partners %}
+  <div class='project-partners'>
+    <h4>Project Partners</h4>
+    {% for partner in attributes.post.partners %}
+      <h5>{{ partner.name }}</h5>
+    {% endfor %}
+  </div>
+{% endif %}

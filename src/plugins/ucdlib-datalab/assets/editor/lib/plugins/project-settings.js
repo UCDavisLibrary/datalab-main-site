@@ -76,7 +76,7 @@ const Edit = () => {
   useEffect(() => {
     if ( projectStartDate ) return;
     const today = getToday();
-    editPost({meta: {projectStartDate: `${y}${m}${d}`}});
+    editPost({meta: {projectStartDate: today}});
 
   }, [projectStartDate]);
 

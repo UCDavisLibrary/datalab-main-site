@@ -1,0 +1,12 @@
+@use "@ucd-lib/theme-sass/0_tools" as *;
+
+.single-project {
+
+  .meta-label {
+    font-weight: 700;
+  }
+  .project-partners {
+    padding: 2rem;
+    background-color: $ucd-blue-30;
+  }
+}
