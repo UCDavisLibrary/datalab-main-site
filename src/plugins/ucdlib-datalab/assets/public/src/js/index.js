@@ -12,6 +12,10 @@ class DynamicScriptLoader {
       {
         name: 'jobs-board',
         cssQuery: ['ucdlib-dl-jobs-board']
+      },
+      {
+        name: 'projects',
+        cssQuery: ['ucdlib-dl-projects']
       }
     ];
   }
@@ -40,6 +44,8 @@ class DynamicScriptLoader {
       this.loaded[bundleName] = import(/* webpackChunkName: "jobs-board-admin" */ './elements/jobs-board/ucdlib-dl-jobs-board-admin.js');
     } else if ( bundleName == 'jobs-board' ){
       this.loaded[bundleName] = import(/* webpackChunkName: "jobs-board" */ './elements/jobs-board/ucdlib-dl-jobs-board.js');
+    } else if ( bundleName == 'projects' ){
+      this.loaded[bundleName] = import(/* webpackChunkName: "projects" */ './elements/projects/ucdlib-dl-projects.js');
     }
     return this.loaded[bundleName]
   }

@@ -2,6 +2,7 @@ import { LitElement } from 'lit';
 import {render, styles} from "./ucdlib-dl-jobs-board.tpl.js";
 
 import WpRest from '../../controllers/wp-rest.js';
+import ElementStatusController from "../../controllers/element-status.js";
 import { WaitController } from '@ucd-lib/theme-elements/utils/controllers/index.js';
 
 /**
@@ -14,7 +15,6 @@ export default class UcdlibDlJobsBoard extends LitElement {
       searchText: { type: String, attribute: 'search-text' },
       currentPage: { type: Number, attribute: 'current-page' },
       restNamespace: { type: String, attribute: 'rest-namespace' },
-      loadingHeight: { type: String, attribute: 'loading-height' },
       jobs: { state: true },
       totalPages: { state: true },
       fetchStatus: { state: true },
@@ -36,12 +36,12 @@ export default class UcdlibDlJobsBoard extends LitElement {
     this.totalPages = 1;
     this.jobs = [];
     this.fetchStatus = 'loading';
-    this.loadingHeight = '200px';
     this.expandedJobs = [];
 
     // controllers
     this.api = new WpRest(this);
     this.wait = new WaitController(this);
+    this.statusController = new ElementStatusController(this, {loadingHeight: '200px'});
   }
 
   async connectedCallback() {
@@ -116,7 +116,7 @@ export default class UcdlibDlJobsBoard extends LitElement {
     const container = this.renderRoot.querySelector('#loaded');
     if ( !container ) return;
     const height = container.offsetHeight;
-    this.loadingHeight = `${height}px`;
+    this.statusController.setLoadingHeight(`${height}px`);
   }
 
   /**

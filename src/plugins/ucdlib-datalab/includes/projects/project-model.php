@@ -8,14 +8,14 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
   public function themes($brief=false){
     if ( isset($this->themes) ){
       if ($brief){
-        return array_map([$this, 'getBriefTaxItem'], $this->themes);
+        return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->themes);
       }
       return $this->themes;
     }
     $projects = new UcdlibDatalabProjects(null, false);
     $this->themes = $this->terms(['taxonomy' => $projects->slugs['taxonomies']['theme']]);
     if ($brief){
-      return array_map([$this, 'getBriefTaxItem'], $this->themes);
+      return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->themes);
     }
     return $this->themes;
   }
@@ -24,14 +24,14 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
   public function approaches($brief=false){
     if ( isset($this->approaches) ){
       if ($brief){
-        return array_map([$this, 'getBriefTaxItem'], $this->approaches);
+        return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->approaches);
       }
       return $this->approaches;
     }
     $projects = new UcdlibDatalabProjects(null, false);
     $this->approaches = $this->terms(['taxonomy' => $projects->slugs['taxonomies']['approach']]);
     if ($brief){
-      return array_map([$this, 'getBriefTaxItem'], $this->approaches);
+      return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->approaches);
     }
     return $this->approaches;
   }
@@ -40,19 +40,19 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
   public function partners($brief=false){
     if ( isset($this->partners) ){
       if ($brief){
-        return array_map([$this, 'getBriefTaxItem'], $this->partners);
+        return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->partners);
       }
       return $this->partners;
     }
     $projects = new UcdlibDatalabProjects(null, false);
     $this->partners = $this->terms(['taxonomy' => $projects->slugs['taxonomies']['partner']]);
     if ($brief){
-      return array_map([$this, 'getBriefTaxItem'], $this->partners);
+      return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $this->partners);
     }
     return $this->partners;
   }
 
-  private function getBriefTaxItem($item){
+  public static function getBriefTaxItem($item){
     return [
       'id' => $item->term_id,
       'name' => $item->name,
@@ -69,8 +69,8 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
     $value = $this->meta($projects->slugs['meta']['status']);
     if ( empty($value ) ) $value = 'active';
     $this->projectStatusObject = [
-      'value' => $value,
-      'label' => ucfirst($value)
+      'slug' => $value,
+      'name' => ucfirst($value)
     ];
 
     if ( $value == 'complete' ){
@@ -80,6 +80,40 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
       }
     }
     return $this->projectStatusObject;
+  }
+
+  public static function getAllThemes($brief=false){
+    $projects = new UcdlibDatalabProjects(null, false);
+    $terms = Timber::get_terms([
+      'taxonomy' => $projects->slugs['taxonomies']['theme'],
+      'hide_empty' => true
+    ]);
+    if ($brief){
+      return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $terms);
+    }
+    return $terms;
+  }
+
+  public static function getAllApproaches($brief=false){
+    $projects = new UcdlibDatalabProjects(null, false);
+    $terms = Timber::get_terms([
+      'taxonomy' => $projects->slugs['taxonomies']['approach'],
+      'hide_empty' => true
+    ]);
+    if ($brief){
+      return array_map([UcdlibDatalabProjectsProjectModel::class, 'getBriefTaxItem'], $terms);
+    }
+    return $terms;
+  }
+
+  public static function getStatusOptions(){
+    $values = ['active', 'complete'];
+    return array_map(function($v){
+      return [
+        'slug' => $v,
+        'name' => ucfirst($v)
+      ];
+    }, $values);
   }
 
   public static function queryProjects($kwargs=[]){

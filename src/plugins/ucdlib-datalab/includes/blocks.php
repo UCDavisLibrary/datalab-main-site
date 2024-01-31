@@ -24,6 +24,10 @@ class UcdlibDatalabBlocks extends UCDThemeBlockRenderer {
     'ucdlib-datalab/project-partners' => [
       'twig' => '@ucdlib-datalab/blocks/project-partners.twig',
       'transform' => ['getCurrentPost']
+    ],
+    'ucdlib-datalab/projects' => [
+      'twig' => '@ucdlib-datalab/blocks/projects.twig',
+      'transform' => ['getProjectsElementProps']
     ]
   ];
 

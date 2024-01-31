@@ -72,7 +72,7 @@ export default class WpRest {
     if ( !options.method ) {
       options.method = 'GET';
     }
-    let cacheKey = this._getCacheKey(url, options);
+    let cacheKey = this._getCacheKey(path, options);
     let cache = this.cache[cacheKey];
 
     if( options.method === 'GET' && cache ) {
@@ -124,12 +124,11 @@ export default class WpRest {
     return `${window.location.origin}/wp-json/${this.host.restNamespace}/${path}`;
   }
 
-  _getCacheKey(url, options={}) {
-    const u = url.split(`${this.host.restNamespace}/`)[1];
+  _getCacheKey(path, options={}) {
     if ( !options.method ) {
       options.method = 'GET';
     }
-    let key = `${options.method}:${u}`;
+    let key = `${options.method}:${path}`;
     if( options.params ) {
       const p = new URLSearchParams(options.params);
       p.sort();
