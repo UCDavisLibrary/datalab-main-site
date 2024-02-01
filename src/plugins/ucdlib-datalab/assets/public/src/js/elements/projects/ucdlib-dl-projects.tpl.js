@@ -1,7 +1,11 @@
 import { html, css } from 'lit';
+import '@ucd-lib/theme-elements/brand/ucd-theme-pagination/ucd-theme-pagination.js'
 
+import normalize from "@ucd-lib/theme-sass/normalize.css.js";
+import headings from "@ucd-lib/theme-sass/1_base_html/_headings.css.js";
 import formStyles from "@ucd-lib/theme-sass/1_base_html/_forms.css.js";
 import formsClasses from "@ucd-lib/theme-sass/2_base_class/_forms.css.js";
+import icons from "@ucd-lib/theme-sass/4_component/_icons.css.js";
 import l3col from "@ucd-lib/theme-sass/5_layout/_l-3col.css.js";
 import lgridRegions from "@ucd-lib/theme-sass/5_layout/_l-grid-regions.css.js";
 import spaceUtils from "@ucd-lib/theme-sass/6_utility/_u-space.css.js";
@@ -46,11 +50,28 @@ export function styles() {
         flex-direction: column;
       }
     }
+    .project {
+      margin-bottom: 2rem;
+    }
+    .project__meta {
+      font-style: italic;
+      margin-bottom: .5rem;
+      font-size: .875rem;
+    }
+    .project__excerpt {
+      margin-bottom: .5rem;
+    }
+    .fw-bold {
+      font-weight: 700;
+    }
   `;
 
   return [
+    normalize,
+    headings,
     formStyles,
     formsClasses,
+    icons,
     l3col,
     lgridRegions,
     spaceUtils,
@@ -80,12 +101,43 @@ function renderResults(){
       <div ?hidden=${this.projects.length}>No Results</div>
       <div ?hidden=${!this.projects.length}>
         ${this.projects.map(project => html`
-          <p>${project.title}</p>
+          <div class='project'>
+            <div class='project__content'>
+              <h4>${project.title}</h4>
+              <div class='project__meta'>
+                <div ?hidden=${!project.themes?.length}>
+                  <span class='fw-bold'>Themes:</span> ${(project.themes || [])?.map(theme => theme.name).join(', ')}
+                </div>
+                <div ?hidden=${!project.approaches?.length}>
+                  <span class='fw-bold'>Approaches:</span> ${(project.approaches || [])?.map(approach => approach.name).join(', ')}
+                </div>
+                <div ?hidden=${!project.status?.name}>
+                  <span class='fw-bold'>Status:</span> ${project.status?.name || ''}${project.status?.endYear ? ` (${project.status.endYear})` : ''}
+                </div>
+              </div>
+              <div class='project__excerpt'>${project.excerpt}</div>
+              <div class='u-space-mb--small' ?hidden=${!project.partners?.length}>
+                <span>Project Partners:</span> ${(project.partners || [])?.map(partner => partner.name).join(', ')}
+              </div>
+              <div ?hidden=${!project.showLink}>
+                <a href=${project.permalink} class="icon icon--circle-arrow-right">More about ${project.title}</a>
+              </div>
+            </div>
+          </div>
         `)}
       </div>
+      <div ?hidden=${!this.totalPages}>
+        <ucd-theme-pagination
+          current-page="${this.currentPage}"
+          ellipses
+          xs-screen
+          @page-change=${(e) => this._onFieldInput('currentPage', e.detail.page)}
+          max-pages=${this.totalPages}>
+        </ucd-theme-pagination>
+    </div>
     </div>
   `;
-  return this.statusController.renderError();
+  return this.statusController.renderError(this.errorMessage);
 }
 
 /**

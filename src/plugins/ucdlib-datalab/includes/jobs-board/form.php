@@ -388,7 +388,7 @@ class UcdlibDatalabJobsBoardForm {
     foreach( $fields as $field ){
       $basicField = [];
       foreach( $propsToExtract as $prop => $newProp ){
-        $basicField[$newProp] = $field[$prop];
+        $basicField[$newProp] = isset($field[$prop]) ? $field[$prop] : '';
       }
       $basicFields[] = $basicField;
     }

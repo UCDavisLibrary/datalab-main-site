@@ -29,7 +29,7 @@ export default class ElementStatus {
         min-height: 20px;
         color: #022851;
       }
-      .loading-icon svg {
+      .loading-icon svg, .error-icon svg {
         display: block;
         width: 100%;
         height: 100%;
@@ -45,6 +45,35 @@ export default class ElementStatus {
         50% { opacity: 1; }
         75% { opacity: 0.5; }
         100% { opacity: 0.4; }
+      }
+      .error {
+        display: flex;
+        justify-content: center;
+      }
+      .error-box {
+        display: flex;
+        justify-content: center;
+        flex-flow: column;
+        align-items: center;
+        padding: 1rem;
+        text-align: center;
+      }
+      .error .error-icon {
+        color: #c10230;
+        width: calc(3vw);
+        height: calc(3vw);
+        max-width: 50px;
+        max-height: 50px;
+        min-width: 20px;
+        min-height: 20px;
+        margin-bottom: .5rem;
+      }
+      .error-message-general {
+        font-weight: 700;
+      }
+      .error-message-specific {
+        font-size: .875rem;
+        color: #5b5b5b;
       }
     `;
     return custom;
@@ -67,10 +96,18 @@ export default class ElementStatus {
     `;
   }
 
-  renderError(){
+  renderError(msg){
     return html`
       <div class='error'>
-        <div>${this.errorMessage}</div>
+        <div class='error-box'>
+          <div class='error-icon'>
+            ${svg`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>
+            `}
+          </div>
+          <div class='error-message-general'>${this.errorMessage}</div>
+          <div class='error-message-specific' ?hidden=${!msg}>${msg}</div>
+        </div>
       </div>
     `;
   }

@@ -7,6 +7,10 @@ class UcdlibDatalabProjectsProjectTheme {
   public function __construct( $projects ){
     $this->projects = $projects;
     add_action('init', [$this, 'register']);
+    add_action(
+      'edited_' . $this->projects->slugs['taxonomies']['theme'],
+      [$this, 'clearProjectsLandingPageCache']
+    );
   }
 
   public function register(){
@@ -48,5 +52,11 @@ class UcdlibDatalabProjectsProjectTheme {
       'menu_name' => 'Themes'
     ];
   }
+
+    // the term filters for this taxonomy are rendered server side on the projects landing page
+    public function clearProjectsLandingPageCache(){
+      if ( !$this->projects->plugin->utils->isPluginActive('wp-hummingbird') ) return;
+      do_action( 'wphb_clear_page_cache', $this->projects->projectsPostId );
+    }
 
 }

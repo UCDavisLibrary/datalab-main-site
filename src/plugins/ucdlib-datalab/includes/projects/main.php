@@ -30,6 +30,7 @@ class UcdlibDatalabProjects {
   // settings. sorry, no admin interface for these yet
   public $resultsPerPage = 10;
   public $projectsMenuId = '91'; // use dev tools on appearance->menus to find this id
+  public $projectsPostId = '80';
 
   public $approach;
   public $project;
@@ -48,6 +49,7 @@ class UcdlibDatalabProjects {
 
   // run all actions and filters
   public function init(){
+
     // post type
     $this->project = new UcdlibDatalabProjectsProjectCtl( $this );
 
@@ -56,7 +58,7 @@ class UcdlibDatalabProjects {
     $this->theme = new UcdlibDatalabProjectsProjectTheme( $this );
     $this->partner = new UcdlibDatalabProjectsProjectPartner( $this );
 
-    // rest
+    // rest api
     $this->rest = new UcdlibDatalabProjectsRest( $this );
 
   }

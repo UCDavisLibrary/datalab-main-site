@@ -5,6 +5,10 @@ import { MutationObserverController, WaitController } from "@ucd-lib/theme-eleme
 import ElementStatusController from "../../controllers/element-status.js";
 import WpRest from '../../controllers/wp-rest.js';
 
+/**
+ * @class UcdlibDlProjects
+ * @description Custom element for displaying a filterable list of datalab projects
+ */
 export default class UcdlibDlProjects extends LitElement {
 
   static get properties() {
@@ -19,7 +23,8 @@ export default class UcdlibDlProjects extends LitElement {
       orderBy: {type: String},
       SsrPropertiesLoaded: {state: true},
       status: {state: true},
-      projects: {state: true}
+      projects: {state: true},
+      errorMessage: {state: true}
     }
   }
 
@@ -41,6 +46,7 @@ export default class UcdlibDlProjects extends LitElement {
     this.currentPage = 1;
     this.totalPages = 1;
     this.projects = [];
+    this.errorMessage = '';
 
     this.SsrPropertiesLoaded = false;
     this.status = 'loading';
@@ -62,6 +68,9 @@ export default class UcdlibDlProjects extends LitElement {
     this.setPropsFromUrl();
   }
 
+  /**
+   * @description Performs API request to get projects based on current element properties
+   */
   async search(){
     this.status = 'loading';
     this.replaceUrlState();
@@ -73,6 +82,7 @@ export default class UcdlibDlProjects extends LitElement {
     if ( response.status !== 'success' ) {
       console.error(response.error);
       this.status = 'error';
+      this.errorMessage = response?.error?.message || '';
       return;
     }
 
@@ -142,6 +152,9 @@ export default class UcdlibDlProjects extends LitElement {
    * @param {String} value new value
    */
   _onFieldInput(prop, value) {
+    if ( prop !== 'currentPage' ) {
+      this.currentPage = 1;
+    }
     this[prop] = value;
     this.search();
   }
