@@ -10,6 +10,8 @@ export default class ElementStatus {
 
     this.loadingHeight = kwargs.loadingHeight || 'auto';
     this.errorMessage = kwargs.errorMessage || 'An unexpected error occurred.';
+    this.noResultsGeneralMessage = kwargs.noResultsGeneralMessage || 'No results found.';
+    this.noResultsSpecificMessage = kwargs.noResultsSpecificMessage || '';
   }
 
   static get styles() {
@@ -29,7 +31,7 @@ export default class ElementStatus {
         min-height: 20px;
         color: #022851;
       }
-      .loading-icon svg, .error-icon svg {
+      .loading-icon svg, .error-icon svg, .no-results-icon svg {
         display: block;
         width: 100%;
         height: 100%;
@@ -75,6 +77,35 @@ export default class ElementStatus {
         font-size: .875rem;
         color: #5b5b5b;
       }
+      .no-results {
+        display: flex;
+        justify-content: center;
+      }
+      .no-results-box {
+        display: flex;
+        justify-content: center;
+        flex-flow: column;
+        align-items: center;
+        padding: 1rem;
+        text-align: center;
+      }
+      .no-results .no-results-icon {
+        color: #13639e;
+        width: calc(3vw);
+        height: calc(3vw);
+        max-width: 50px;
+        max-height: 50px;
+        min-width: 20px;
+        min-height: 20px;
+        margin-bottom: .5rem;
+      }
+      .no-results-message-general {
+        font-weight: 700;
+      }
+      .no-results-message-specific {
+        font-size: .875rem;
+        color: #5b5b5b;
+      }
     `;
     return custom;
   }
@@ -83,6 +114,24 @@ export default class ElementStatus {
     this.loadingHeight = height;
     this.host.requestUpdate();
   }
+
+  renderNoResults(msg) {
+    msg = msg || this.noResultsSpecificMessage;
+    return html`
+    <div class='no-results'>
+      <div class='no-results-box'>
+        <div class='no-results-icon'>
+          ${svg`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24V264c0 13.3-10.7 24-24 24s-24-10.7-24-24V152c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>
+          `}
+        </div>
+        <div class='no-results-message-general'>${this.noResultsGeneralMessage}</div>
+        <div class='no-results-message-specific' ?hidden=${!msg}>${msg}</div>
+      </div>
+    </div>
+  `;
+  }
+
 
   renderLoading() {
     return html`

@@ -63,7 +63,12 @@ export default class UcdlibDlProjects extends LitElement {
     new MutationObserverController(this, {childList: true, subtree: false}, '_onScriptLoaded');
     this.api = new WpRest(this);
     this.wait = new WaitController(this);
-    this.statusController = new ElementStatusController(this);
+    this.statusController = new ElementStatusController(this, {
+      loadingHeight: 'auto',
+      errorMessage: 'An unexpected error occurred.',
+      noResultsGeneralMessage: 'No projects found.',
+      noResultsSpecificMessage: 'Please refine your search criteria and try again.'
+    });
 
     this.setPropsFromUrl();
   }

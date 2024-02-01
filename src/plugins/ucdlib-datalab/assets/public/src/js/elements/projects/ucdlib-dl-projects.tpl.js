@@ -98,7 +98,7 @@ function renderResults(){
   if ( this.status == 'loading' ) return this.statusController.renderLoading();
   if ( this.status == 'loaded' ) return html`
     <div id='loaded'>
-      <div ?hidden=${this.projects.length}>No Results</div>
+      <div ?hidden=${this.projects.length}>${this.statusController.renderNoResults()}</div>
       <div ?hidden=${!this.projects.length}>
         ${this.projects.map(project => html`
           <div class='project'>
