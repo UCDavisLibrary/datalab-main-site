@@ -17,8 +17,8 @@ class UcdlibDatalabBlockTransformations {
   public static function getProjectsElementProps($attrs=array()){
     $model = UcdlibDatalabProjectsProjectModel::class;
     $props = [
-      'themeFilters' => $model::getAllThemes(true),
-      'approachFilters' => $model::getAllApproaches(true),
+      'themeFilters' => array_values($model::getAllThemes(true)),
+      'approachFilters' => array_values($model::getAllApproaches(true)),
       'statusFilters' => $model::getStatusOptions(),
       'restNamespace' => 'ucdlib-datalab/project',
     ];
