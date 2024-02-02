@@ -52,6 +52,11 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
     return $this->partners;
   }
 
+  public function markAsCompleted(){
+    $projects = new UcdlibDatalabProjects(null, false);
+    return update_post_meta($this->ID, $projects->slugs['meta']['status'], 'complete');
+  }
+
   public static function getBriefTaxItem($item){
     return [
       'id' => $item->term_id,
@@ -114,6 +119,38 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
         'name' => ucfirst($v)
       ];
     }, $values);
+  }
+
+  public static function getAllActiveProjectsPastCompletionDate(){
+    $projects = new UcdlibDatalabProjects(null, false);
+    $q = [
+      'post_type' => $projects->slugs['project'],
+      'posts_per_page' => -1,
+      'orderby' => 'meta_value',
+      'order' => 'DESC',
+      'meta_query' => [
+        'relation' => 'AND',
+        [
+          'relation' => 'OR',
+          [
+            'key' => $projects->slugs['meta']['status'],
+            'value' => 'active',
+            'compare' => '='
+          ],
+          [
+            'key' => $projects->slugs['meta']['status'],
+            'compare' => 'NOT EXISTS'
+          ]
+        ],
+        [
+          'key' => $projects->slugs['meta']['endDate'],
+          'value' => date('Y-m-d'),
+          'compare' => '<',
+          'type' => 'DATE'
+        ]
+      ]
+    ];
+    return Timber::get_posts($q);
   }
 
   public static function queryProjects($kwargs=[]){

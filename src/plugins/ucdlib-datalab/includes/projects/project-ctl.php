@@ -5,19 +5,23 @@ require_once( __DIR__ . '/project-model.php' );
 // controller for the project post type
 class UcdlibDatalabProjectsProjectCtl {
   public $projects;
+  public $cronJobHook;
 
   public function __construct( $projects ){
     $this->projects = $projects;
+    $this->cronJobHook = $this->projects->plugin->config->slug . '_' . $this->projects->slugs['project'] . '_status_check';
 
     add_filter( 'timber/post/classmap', [$this, 'registerModel'] );
     add_action( 'init', [$this, 'register'] );
     add_action( 'init', [$this, 'registerPostMeta'] );
     add_filter( 'manage_' . $this->projects->slugs['project'] . '_posts_columns', [$this, 'addStatusAdminColumn'] );
     add_action( 'manage_' . $this->projects->slugs['project'] . '_posts_custom_column', [$this, 'addStatusAdminColumnContent'], 10, 2 );
-    add_filter( 'get_post_metadata', [$this, 'setCustomParentPage'], 10, 5 );
+    add_filter( 'ucd-theme/post/breadcrumbs/custom_parent', [$this, 'setCustomParentPage'], 10, 2 );
     add_action( 'widgets_init', [$this, 'registerSidebar'] );
     add_filter( 'ucd-theme/templates/single', [$this, 'setTemplate'], 10, 2 );
     add_filter( 'ucd-theme/context/single', [$this, 'setContext'] );
+    add_action( 'wp', [$this, 'scheduleCronJob'] );
+    add_action( $this->cronJobHook, [$this, 'markPastAsCompleted'] );
   }
 
   public function register(){
@@ -46,12 +50,28 @@ class UcdlibDatalabProjectsProjectCtl {
     register_post_type($this->projects->slugs['project'], $args);
   }
 
-  // intercept all get_post_meta calls for the custom parent page and return the projects page id
-  public function setCustomParentPage($value, $post_id, $meta_key, $single, $meta_type){
-    if ($meta_key == 'ucd_nav_parent' && get_post_type($post_id) == $this->projects->slugs['project']) {
-      return $this->projects->projectsMenuId;
+  /**
+   * Schedule cron job
+   */
+  public function scheduleCronJob(){
+    if ( !wp_next_scheduled( $this->cronJobHook ) ) {
+      wp_schedule_event( time(), 'daily', $this->cronJobHook );
     }
+  }
+
+  public function setCustomParentPage($value, $post){
+    if ( $post->post_type == $this->projects->slugs['project'] )
+      return $this->projects->projectsMenuId;
     return $value;
+  }
+
+  // mark past projects as completed
+  public function markPastAsCompleted(){
+    $model = UcdlibDatalabProjectsProjectModel::class;
+    $posts = $model::getAllActiveProjectsPastCompletionDate();
+    foreach ($posts as $post){
+      $post->markAsCompleted();
+    }
   }
 
   // register sidebar widget area for single project

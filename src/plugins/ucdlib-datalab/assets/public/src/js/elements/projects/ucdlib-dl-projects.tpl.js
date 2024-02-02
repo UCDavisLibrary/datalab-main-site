@@ -106,10 +106,10 @@ function renderResults(){
               <h4>${project.title}</h4>
               <div class='project__meta'>
                 <div ?hidden=${!project.themes?.length}>
-                  <span class='fw-bold'>Themes:</span> ${(project.themes || [])?.map(theme => theme.name).join(', ')}
+                  <span class='fw-bold'>Themes:</span> ${(project.themes || [])?.map(theme => theme.name).join(' | ')}
                 </div>
                 <div ?hidden=${!project.approaches?.length}>
-                  <span class='fw-bold'>Approaches:</span> ${(project.approaches || [])?.map(approach => approach.name).join(', ')}
+                  <span class='fw-bold'>Approaches:</span> ${(project.approaches || [])?.map(approach => approach.name).join(' | ')}
                 </div>
                 <div ?hidden=${!project.status?.name}>
                   <span class='fw-bold'>Status:</span> ${project.status?.name || ''}${project.status?.endYear ? ` (${project.status.endYear})` : ''}
@@ -117,7 +117,7 @@ function renderResults(){
               </div>
               <div class='project__excerpt'>${project.excerpt}</div>
               <div class='u-space-mb--small' ?hidden=${!project.partners?.length}>
-                <span>Project Partners:</span> ${(project.partners || [])?.map(partner => partner.name).join(', ')}
+                <span>Project Partners:</span> ${(project.partners || [])?.map(partner => partner.name).join(' | ')}
               </div>
               <div ?hidden=${!project.showLink}>
                 <a href=${project.permalink} class="icon icon--circle-arrow-right">More about ${project.title}</a>

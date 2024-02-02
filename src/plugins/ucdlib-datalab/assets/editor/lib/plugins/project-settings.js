@@ -32,21 +32,45 @@ const Edit = () => {
   ];
   const { editPost } = useDispatch( 'core/editor', watchedVars );
 
+  // date formated as YYYY-MM-DD
+  const updateStatusFromEndDate = (date) => {
+    if ( !date ){
+      editPost({meta: {projectStatus: 'active'}});
+      return;
+    }
+    const today = new Date();
+    const d = new Date(date);
+    if ( d > today ) {
+      editPost({meta: {projectStatus: 'active'}});
+    } else {
+      editPost({meta: {projectStatus: 'complete'}});
+    }
+  }
+
   // project range date picker
   const datePickerDropdown = (onDropdownClose, field) => {
     let value = field == 'projectStartDate' ? projectStartDate : projectEndDate;
     if ( value && value.length == 8) {
       value = `${value.slice(0,4)}-${value.slice(4,6)}-${value.slice(6,8)}T12:00:00Z`;
+    } else if ( value && value.length == 10) {
+      value = `${value}T12:00:00Z`;
     } else if (value) {
       console.warn(`${field} date was saved in incorrect format: ${value}`);
       value = null;
     }
     const onChange = (v) => {
-      editPost({meta: {[field]: v.split('T')[0].replace(/-/g, '')}});
+      const d = v.split('T')[0];
+      editPost({meta: {[field]: d}});
+      if ( field === 'projectEndDate' ){
+        updateStatusFromEndDate(d);
+      }
       onDropdownClose();
     }
     const onReset = () => {
       editPost({meta: {[field]: null}});
+      if ( field === 'projectEndDate' ){
+        updateStatusFromEndDate(null);
+      }
       onDropdownClose();
     }
     return html`
@@ -60,16 +84,16 @@ const Edit = () => {
   }
   const dateLabel = (d) => {
     if ( !d ) return 'Not Set';
-    return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6)}`;
+    return d;
   }
 
-  // get today formatted as YYYYMMDD - the way WP likes dates
+  // get today formatted as YYYY-MM-DD - the way WP likes dates
   const getToday = () => {
     const today = new Date();
     const y = today.getFullYear();
     const m = (today.getMonth()+1).toString().padStart(2, '0');
     const d = today.getDate().toString().padStart(2, '0');
-    return `${y}${m}${d}`;
+    return `${y}-${m}-${d}`;
   }
 
   // if project start date is not set, set it to today

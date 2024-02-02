@@ -39,7 +39,7 @@
       <span class='meta-label'>{{label}}: </span>
       {% for t in tax %}
         <span>{{t.name}}</span>
-        {% if not loop.last %}<span>, </span>{% endif %}
+        {% if not loop.last %}<span> | </span>{% endif %}
       {% endfor %}
     </div>
     {% endapply %}

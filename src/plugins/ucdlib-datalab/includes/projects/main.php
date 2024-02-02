@@ -29,7 +29,7 @@ class UcdlibDatalabProjects {
 
   // settings. sorry, no admin interface for these yet
   public $resultsPerPage = 10;
-  public $projectsMenuId = '91'; // use dev tools on appearance->menus to find this id
+  public $projectsMenuId = 91; // use dev tools on appearance->menus to find this id
   public $projectsPostId = '80';
 
   public $approach;
