@@ -23,6 +23,10 @@ class UcdlibDatalabBlockTransformations {
       'restNamespace' => 'ucdlib-datalab/project',
     ];
 
+    if (isset($GLOBALS['UcdSite'])){
+      $props['defaultImage'] = $GLOBALS['UcdSite']->customBlocks->getImageByAspectRatio('4x3');
+    }
+
     $attrs['eleProps'] = $props;
     return $attrs;
   }

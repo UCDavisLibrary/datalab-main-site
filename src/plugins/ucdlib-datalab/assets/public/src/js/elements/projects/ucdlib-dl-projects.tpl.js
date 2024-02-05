@@ -52,6 +52,19 @@ export function styles() {
     }
     .project {
       margin-bottom: 2rem;
+      display: grid;
+      grid-template-rows: auto;
+      grid-template-columns: 30% auto;
+    }
+    .project figure {
+      background-size: cover;
+      height: 100%;
+      min-height: 250px;
+      background-position: center;
+      margin: 0;
+    }
+    .project__content {
+      margin-left: 1rem;
     }
     .project__meta {
       font-style: italic;
@@ -102,6 +115,7 @@ function renderResults(){
       <div ?hidden=${!this.projects.length}>
         ${this.projects.map(project => html`
           <div class='project'>
+            <figure style='background-image: url(${this.projectImage(project)})'></figure>
             <div class='project__content'>
               <h4>${project.title}</h4>
               <div class='project__meta'>

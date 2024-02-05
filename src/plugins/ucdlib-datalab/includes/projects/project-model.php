@@ -216,6 +216,7 @@ class UcdlibDatalabProjectsProjectModel extends UcdThemePost {
       $p['permalink'] = $post->link();
       //$p['excerpt'] = strval($post->excerpt(['words' => 500]));
       $p['excerpt'] = $post->post_excerpt ? $post->post_excerpt : '';
+      $p['imageSrc'] = $post->card_image() ? $post->card_image()->src() : null;
 
       $p['showLink'] = $post->meta($projects->slugs['meta']['showLink']) ? true : false;
       $p['status'] = $post->projectStatusObject();

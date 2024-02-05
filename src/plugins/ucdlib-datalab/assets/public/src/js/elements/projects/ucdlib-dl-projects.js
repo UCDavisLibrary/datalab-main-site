@@ -19,6 +19,7 @@ export default class UcdlibDlProjects extends LitElement {
       selectedApproach: {type: String},
       selectedStatus: {type: String},
       selectedTheme: {type: String},
+      defaultImage: {type: String},
       totalPages: { state: true },
       orderBy: {type: String},
       SsrPropertiesLoaded: {state: true},
@@ -47,6 +48,7 @@ export default class UcdlibDlProjects extends LitElement {
     this.totalPages = 1;
     this.projects = [];
     this.errorMessage = '';
+    this.defaultImage = '';
 
     this.SsrPropertiesLoaded = false;
     this.status = 'loading';
@@ -110,6 +112,16 @@ export default class UcdlibDlProjects extends LitElement {
         this[map.prop] = url.searchParams.get(map.param);
       }
     }
+  }
+
+  /**
+   * @description Get the image source for a project
+   * @param {Object} project - Project object from API
+   * @returns {String} - Image source
+   */
+  projectImage(project){
+    if ( project.imageSrc ) return project.imageSrc;
+    return this.defaultImage;
   }
 
   /**
