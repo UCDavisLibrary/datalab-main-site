@@ -52,19 +52,19 @@ export function styles() {
     }
     .project {
       margin-bottom: 2rem;
-      display: grid;
+      display: block;
       grid-template-rows: auto;
       grid-template-columns: 30% auto;
     }
     .project figure {
       background-size: cover;
-      height: 100%;
-      min-height: 250px;
+      background-repeat: no-repeat;
       background-position: center;
-      margin: 0;
-    }
-    .project__content {
-      margin-left: 1rem;
+      margin: 0 0 1rem 0;
+      width: 100%;
+      padding-top: 56.25%;
+      overflow: hidden;
+      position: relative;
     }
     .project__meta {
       font-style: italic;
@@ -76,6 +76,18 @@ export function styles() {
     }
     .fw-bold {
       font-weight: 700;
+    }
+    @media ( min-width: 480px ) {
+      .project {
+        display: grid;
+      }
+      .project__content {
+        margin-left: 1.5rem;
+      }
+      .project figure {
+        margin: 0;
+        min-height: 250px;
+      }
     }
   `;
 
