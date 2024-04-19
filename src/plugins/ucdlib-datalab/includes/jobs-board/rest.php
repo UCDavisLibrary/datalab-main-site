@@ -145,7 +145,8 @@ class UcdlibDatalabJobsBoardRest {
       'totalPageCt' => ceil( $totalCt / $this->jobsBoard->jobsPerPage ),
       'jobs' => $jobs,
       'assignedFormFields' => $settings['selectedFormFields'],
-      'formFields' => $formFields
+      'formFields' => $formFields,
+      'filters' => $this->jobsBoard->form->getPublicFilterOptions()
     ];
     return $out;
   }

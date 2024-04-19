@@ -62,9 +62,14 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
       statusCheck: 'run-status-check'
     }
     this.formFields = [
-      {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle'},
-      {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate'},
-      {id: 'employer', name: 'Employer', settingsProp: 'employer'}
+      {id: 'job-title', name: 'Job Title', settingsProp: 'jobTitle', required: true},
+      {id: 'listing-end-date', name: 'Listing End Date', settingsProp: 'listingEndDate', required: true},
+      {id: 'employer', name: 'Employer', settingsProp: 'employer', required: true},
+      {id: 'location', name: 'Location', settingsProp: 'location'},
+      {id: 'listing-url', name: 'Listing URL', settingsProp: 'listingUrl'},
+      {id: 'position-type', name: 'Position Type', settingsProp: 'positionType'},
+      {id: 'sector', name: 'Sector', settingsProp: 'sector'},
+      {id: 'education', name: 'Education Level', settingsProp: 'education'}
     ];
     this.pageHistory = [];
 

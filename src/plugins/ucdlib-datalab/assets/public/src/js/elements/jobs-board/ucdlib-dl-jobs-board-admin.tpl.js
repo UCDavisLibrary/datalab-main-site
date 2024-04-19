@@ -345,58 +345,19 @@ export function renderSettings(){
           </select>
         </div>
         <div>
-          <label>Job Submission Form Fields</label>
+          <label>Job Submission Form Field Mapping</label>
           <p class='u-space-mb--flush'>
-            The following fields must be part of the job submission form.
+            The following fields must be part of the job submission form in order for the approval process to work.
             Match them to their corresponding job submission form field.</p>
           <div class='o-box'>
-            ${this.formFields.map(field => html`
-              <div class='field-container'>
-                <label>${field.name}</label>
-                <select
-                  @input=${e => this._onSettingsFormFieldSelect(field.settingsProp, e.target.value)}
-                  .value=${page.data.selectedFormFields[field.settingsProp]}>
-                  <option value="">Select a form field</option>
-                  ${this.filterFields(page.data.formFields).map(formField => html`
-                    <option value=${formField.id} ?selected=${page.data.selectedFormFields[field.settingsProp] == formField.id}>${formField.label || formField.id}</option>
-                  `)}
-                </select>
-              </div>
-            `)}
+            ${this.formFields.filter(f => f.required).map(field => renderFormFieldMapping.call(this, field, page))}
           </div>
-        </div>
-      </fieldset>
-      <fieldset>
-        <legend>Public Display</legend>
-        <label>Field Visibility and Order</label>
-        <p class='u-space-mb--flush'>Toggle whether a job field is displayed to the public and the order.</p>
-        <div class='o-box'>
-          ${this._fieldDisplayOrderArray().map(field => html`
-            <div class='l-3col u-space-mb'>
-              <div class='l-first'><label>${field.label || field.id}</label></div>
-              <div class='l-second'>
-                <select
-                  class='u-space-mb--small'
-                  @input=${e => this._onSettingsFormFieldDisplayToggle(field.id)}
-                  .value=${field.hide ? '0' : '1'}
-                >
-                  <option value="1" ?selected=${!field.hide}>Show</option>
-                  <option value="0" ?selected=${field.hide}>Hide</option>
-                </select>
-              </div>
-              <div class='l-third'>
-                <div ?hidden=${field.hide}>
-                  <input
-                    class='u-space-mb--small'
-                    type="number"
-                    min="-1"
-                    @input=${e => this._onSettingsFormFieldOrderChange(field.id, e.target.value)}
-                    .value=${field.order}
-                  />
-                </div>
-              </div>
-            </div>
-          `)}
+          <p class='u-space-mb--flush'>
+            Matching the following fields will display them on the public job board - but this is not required.
+          </p>
+          <div class='o-box'>
+            ${this.formFields.filter(f => !f.required).map(field => renderFormFieldMapping.call(this, field, page))}
+          </div>
         </div>
       </fieldset>
       <fieldset>
@@ -456,6 +417,66 @@ export function renderSettings(){
     </form>
 
   `;
+}
+
+function renderFormFieldMapping(field, page){
+  return html`
+    <div class='field-container'>
+      <label>${field.name}</label>
+      <select
+        @input=${e => this._onSettingsFormFieldSelect(field.settingsProp, e.target.value)}
+        .value=${page.data.selectedFormFields[field.settingsProp]}>
+        <option value="">Select a form field</option>
+        ${this.filterFields(page.data.formFields).map(formField => html`
+          <option value=${formField.id} ?selected=${page.data.selectedFormFields[field.settingsProp] == formField.id}>${formField.label || formField.id}</option>
+        `)}
+      </select>
+    </div>
+  `
+
+}
+
+/**
+ * @description Renders settings section that allows for the configuration of additional job fields on the
+ * public jobs board.
+ * Feature not currently implemented for Datalab Jobs Board
+ * @returns
+ */
+function renderAdditionalFieldsSettings(){
+  return html`
+  <fieldset>
+    <legend>Public Display</legend>
+    <label>Field Visibility and Order</label>
+    <p class='u-space-mb--flush'>Toggle whether a job field is displayed to the public and the order.</p>
+    <div class='o-box'>
+      ${this._fieldDisplayOrderArray().map(field => html`
+        <div class='l-3col u-space-mb'>
+          <div class='l-first'><label>${field.label || field.id}</label></div>
+          <div class='l-second'>
+            <select
+              class='u-space-mb--small'
+              @input=${e => this._onSettingsFormFieldDisplayToggle(field.id)}
+              .value=${field.hide ? '0' : '1'}
+            >
+              <option value="1" ?selected=${!field.hide}>Show</option>
+              <option value="0" ?selected=${field.hide}>Hide</option>
+            </select>
+          </div>
+          <div class='l-third'>
+            <div ?hidden=${field.hide}>
+              <input
+                class='u-space-mb--small'
+                type="number"
+                min="-1"
+                @input=${e => this._onSettingsFormFieldOrderChange(field.id, e.target.value)}
+                .value=${field.order}
+              />
+            </div>
+          </div>
+        </div>
+      `)}
+    </div>
+  </fieldset>`
 }
 
 /**

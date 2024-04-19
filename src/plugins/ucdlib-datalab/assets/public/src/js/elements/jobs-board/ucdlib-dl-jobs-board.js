@@ -166,6 +166,11 @@ export default class UcdlibDlJobsBoard extends LitElement {
         title: job.meta_data?.[assignedFormFields.jobTitle]?.value || '',
         employer: job.meta_data?.[assignedFormFields.employer]?.value || '',
         endDate: job.meta_data?.[assignedFormFields.listingEndDate]?.value || '',
+        location: job.meta_data?.[assignedFormFields.location]?.value || '',
+        listingUrl: job.meta_data?.[assignedFormFields.listingUrl]?.value || '',
+        positionType: job.meta_data?.[assignedFormFields.positionType]?.value || '',
+        sector: job.meta_data?.[assignedFormFields.sector]?.value || '',
+        education: job.meta_data?.[assignedFormFields.education]?.value || '',
         posted: job.meta_data?.['forminator_addon_dl-jb_posted-date']?.value || '',
         additionalFields: []
       }

@@ -60,6 +60,36 @@ class UcdlibDatalabJobsBoardForm {
   }
 
   /**
+   * Returns options for public select filters.
+   * These are mapped to form fields from the admin settings
+   */
+  public function getPublicFilterOptions(){
+    $out = [
+      'sector' => [],
+      'education' => []
+    ];
+    if ( !$this->apiAvailable() ) return $out;
+
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return $out;
+    $formId = $settings['selectedForm'];
+
+    $fields = $this->getFormFields($formId, true, true);
+    return $fields;
+
+    foreach ( array_keys($out) as $key ) {
+      if ( empty($settings['selectedFormFields'][$key]) ) continue;
+      $fieldId = $settings['selectedFormFields'][$key];
+      if ( empty($fields[$fieldId]) ) continue;
+      $field = $fields[$fieldId];
+
+      $out[$key] = $field;
+    }
+
+    return $out;
+  }
+
+  /**
    * Check if a job submission entry has a given meta id
    */
   public function submissionHasMeta( $entryId, $metaId ){
@@ -372,7 +402,7 @@ class UcdlibDatalabJobsBoardForm {
    * Returns either a sequential array of form field wrappers
    * or if $toBasicArray is true, a sequential array of just the field objects (brief view)
    */
-  public function getFormFields($formId, $toBasicArray=false){
+  public function getFormFields($formId, $toBasicArray=false, $includeOptions=false){
     if ( !$this->apiAvailable() ) return [];
     $fields = Forminator_API::get_form_wrappers($formId);
     if ( is_wp_error($fields) ) return [];
@@ -384,6 +414,9 @@ class UcdlibDatalabJobsBoardForm {
       'field_label' => 'label',
       'type' => 'type'
     ];
+    if ( $includeOptions ) {
+      $propsToExtract['options'] = 'options';
+    }
     $basicFields = [];
     foreach( $fields as $field ){
       $basicField = [];
