@@ -75,15 +75,15 @@ class UcdlibDatalabJobsBoardForm {
     $formId = $settings['selectedForm'];
 
     $fields = $this->getFormFields($formId, true, true);
-    return $fields;
 
     foreach ( array_keys($out) as $key ) {
-      if ( empty($settings['selectedFormFields'][$key]) ) continue;
+      if ( !isset($settings['selectedFormFields'][$key]) ) continue;
       $fieldId = $settings['selectedFormFields'][$key];
-      if ( empty($fields[$fieldId]) ) continue;
-      $field = $fields[$fieldId];
-
-      $out[$key] = $field;
+      foreach( $fields as $field ){
+        if ( isset($field['options']) && $field['id'] == $fieldId ) {
+          $out[$key] = $field['options'];
+        }
+      }
     }
 
     return $out;

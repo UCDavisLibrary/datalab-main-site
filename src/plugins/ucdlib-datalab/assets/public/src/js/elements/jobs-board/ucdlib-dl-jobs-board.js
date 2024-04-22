@@ -13,9 +13,13 @@ export default class UcdlibDlJobsBoard extends LitElement {
   static get properties() {
     return {
       searchText: { type: String, attribute: 'search-text' },
+      filterSector: { type: String, attribute: 'filter-sector' },
+      filterEducation: { type: String, attribute: 'filter-education' },
       currentPage: { type: Number, attribute: 'current-page' },
       restNamespace: { type: String, attribute: 'rest-namespace' },
       jobs: { state: true },
+      sectors: { state: true },
+      educationLevels: { state: true },
       totalPages: { state: true },
       fetchStatus: { state: true },
       expandedJobs: { state: true }
@@ -32,9 +36,13 @@ export default class UcdlibDlJobsBoard extends LitElement {
 
     this.restNamespace = 'ucdlib-datalab/jobs-board';
     this.searchText = '';
+    this.filterSector = '';
+    this.filterEducation = '';
     this.currentPage = 1;
     this.totalPages = 1;
     this.jobs = [];
+    this.sectors = [];
+    this.educationLevels = [];
     this.fetchStatus = 'loading';
     this.expandedJobs = [];
 
@@ -72,27 +80,11 @@ export default class UcdlibDlJobsBoard extends LitElement {
     // extract data
     this.totalPages = response.data.totalPageCt || 1;
     this.jobs = this._transformJobs(response);
+    this.sectors = response.data?.filters?.sector || []
+    this.educationLevels = response.data?.filters?.education || [];
 
     this.fetchStatus = 'loaded';
     await this.setLoadingHeight();
-  }
-
-  /**
-   * @description Handle search input
-   */
-  _onSearchInput(e){
-    this.searchText = e.target.value;
-
-    if ( this.searchTimeout ) {
-      clearTimeout(this.searchTimeout);
-    }
-    this.searchTimeout = setTimeout(async () => {
-      await this._onSearchSubmit();
-      const searchInput = this.renderRoot.querySelector('#search');
-      if ( searchInput ) {
-        searchInput.focus();
-      }
-    }, 500);
   }
 
   /**
@@ -105,6 +97,13 @@ export default class UcdlibDlJobsBoard extends LitElement {
     this.expandedJobs = [];
     this.currentPage = 1;
     await this.getJobs();
+  }
+
+  _onInputChange(prop, value, doSearch){
+    this[prop] = value;
+    if ( doSearch ) {
+      this._onSearchSubmit();
+    }
   }
 
   /**

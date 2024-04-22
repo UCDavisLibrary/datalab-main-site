@@ -6,6 +6,7 @@ import baseHtml from "@ucd-lib/theme-sass/1_base_html/_index.css.js";
 import baseClass from "@ucd-lib/theme-sass/2_base_class/_index.css.js";
 import brandTextBox from "@ucd-lib/theme-sass/4_component/_brand-textbox.css.js";
 import categoryBrand from "@ucd-lib/theme-sass/4_component/_category-brand.css.js";
+import searchCss from "@ucd-lib/theme-sass/4_component/_search-form.css.js";
 import l2col from "@ucd-lib/theme-sass/5_layout/_l-2col.css.js";
 import l3col from "@ucd-lib/theme-sass/5_layout/_l-3col.css.js";
 import gridRegions from "@ucd-lib/theme-sass/5_layout/_l-grid-regions.css.js";
@@ -17,6 +18,7 @@ export function styles() {
   const elementStyles = css`
     :host {
       display: block;
+      --l-gap-override: 1.5rem;
     }
     [hidden] {
       display: none !important;
@@ -61,15 +63,39 @@ export function styles() {
     .pointer {
       cursor: pointer;
     }
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-    }
     .no-jobs {
       display: flex;
       justify-content: center;
+    }
+    select {
+      background-color: #B0D0ED;
+      color: #022851;
+      font-weight: 700;
+      border: none;
+      font-size: 1rem;
+    }
+    select:focus {
+      background-color: #b0d0ed;
+      border: 1px solid #999;
+    }
+    .search-form__input {
+      font-size: 1rem;
+      height: 2.5rem;
+    }
+    .search-form label {
+      display: none;
+    }
+    .search-form__submit {
+      line-height: 1.9;
+      text-indent: .2em;
+    }
+    .header {
+      border-bottom: 4px dotted #FFBF00;
+      margin-bottom: 1rem;
+    }
+    .header .col {
+      margin-top: 0 !important;
+      margin-bottom: 1rem !important;
     }
   `;
 
@@ -79,6 +105,7 @@ export function styles() {
     baseClass,
     brandTextBox,
     categoryBrand,
+    searchCss,
     l2col,
     l3col,
     gridRegions,
@@ -178,15 +205,47 @@ function renderHeader(){
   return html`
     <div class='header'>
       <form @submit=${this._onSearchSubmit}>
-        <div class="field-container">
-          <input
-            id="search"
-            type="search"
-            .value=${this.searchText}
-            @input=${this._onSearchInput}
-            ?disabled=${inputsDisabled}
-            placeholder="Search all jobs...">
+        <div class='l-3col'>
+          <div class='l-third col'>
+            <div class="search-form">
+              <label for="search">${this.labelText}</label>
+              <input
+                id="search"
+                ?disabled=${inputsDisabled}
+                type="text"
+                placeholder="Search Jobs"
+                class="search-form__input"
+                name=${this.queryParam}
+                @input=${e => this._onInputChange('searchText', e.target.value)}
+                value="${this.searchText}">
+              <button type="submit" class="search-form__submit">&#xf002; Submit
+              </button>
+            </div>
+          </div>
+          <div class='l-first col'>
+            <select
+              .value=${this.filterSector}
+              ?disabled=${inputsDisabled}
+              @input=${e => this._onInputChange('filterSector', e.target.value, true)}>
+              <option value=''>Any Sector</option>
+              ${this.sectors.map(sector => html`
+                <option value=${sector.value} ?selected=${sector.value == this.filterSector}>${sector.label}</option>
+              `)}
+            </select>
+          </div>
+          <div class='l-second col'>
+            <select
+              .value=${this.filterEducation}
+              ?disabled=${inputsDisabled}
+              @input=${e => this._onInputChange('filterEducation', e.target.value, true)}>
+              <option value=''>Any Level</option>
+              ${this.educationLevels.map(level => html`
+                <option value=${level.value} ?selected=${level.value == this.filterEducation}>${level.label}</option>
+              `)}
+            </select>
+          </div>
         </div>
+
       </form>
     </div>
   `;
