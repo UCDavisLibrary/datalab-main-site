@@ -276,19 +276,33 @@ class UcdlibDatalabJobsBoardForm {
     $offset = ($args['page'] - 1) * $this->jobsBoard->jobsPerPage;
 
     // construct where clause
-    $secondJoin = '';
+    $searchJoin = '';
+    $sectorJoin = '';
+    $educationJoin = '';
+    $sectorMetaKey = $settings['selectedFormFields']['sector'] ?? '';
+    $educationMetaKey = $settings['selectedFormFields']['education'] ?? '';
     $where = $wpdb->prepare( 'WHERE em.meta_key = %s AND em.meta_value = %s', $statusMetaKey, $args['status'] );
     $where .= $wpdb->prepare( ' AND e.form_id = %d', esc_sql( $formId ) );
     $where .= $wpdb->prepare( ' AND e.is_spam = %s', esc_sql( 0 ) );
     if ( isset( $args['search'] ) ) {
-			$where .= $wpdb->prepare( ' AND em2.meta_value LIKE %s', '%' . $wpdb->esc_like( $args['search'] ) . '%' );
-      $secondJoin = "INNER JOIN {$this->entryMetaTable} em2 ON e.entry_id = em2.entry_id";
+			$where .= $wpdb->prepare( ' AND em_search.meta_value LIKE %s', '%' . $wpdb->esc_like( $args['search'] ) . '%' );
+      $searchJoin = "INNER JOIN {$this->entryMetaTable} em_search ON e.entry_id = em_search.entry_id";
 		}
+    if ( !empty($sectorMetaKey) && isset($args['sector']) ) {
+      $where .= $wpdb->prepare( ' AND em_sector.meta_key = %s AND em_sector.meta_value = %s', $sectorMetaKey, $args['sector'] );
+      $sectorJoin = "INNER JOIN {$this->entryMetaTable} em_sector ON e.entry_id = em_sector.entry_id";
+    }
+    if ( !empty($educationMetaKey) && isset($args['education']) ) {
+      $where .= $wpdb->prepare( ' AND em_education.meta_key = %s AND em_education.meta_value = %s', $educationMetaKey, $args['education'] );
+      $educationJoin = "INNER JOIN {$this->entryMetaTable} em_education ON e.entry_id = em_education.entry_id";
+    }
 
     $sqlCount = "SELECT count(DISTINCT e.entry_id) as total_entries
       FROM {$this->entryTable} e
       INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
-      {$secondJoin}
+      {$searchJoin}
+      {$sectorJoin}
+      {$educationJoin}
       {$where}";
 
     $count = intval( $wpdb->get_var( $sqlCount ) );
@@ -302,7 +316,9 @@ class UcdlibDatalabJobsBoardForm {
       $sql = "SELECT e.entry_id AS entry_id
         FROM {$this->entryTable} e
         INNER JOIN {$this->entryMetaTable} em ON e.entry_id = em.entry_id
-        {$secondJoin}
+        {$searchJoin}
+        {$sectorJoin}
+        {$educationJoin}
         {$where}
         {$groupBy}
         {$orderBy} {$order}

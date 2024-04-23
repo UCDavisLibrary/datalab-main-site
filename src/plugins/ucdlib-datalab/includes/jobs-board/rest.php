@@ -118,6 +118,18 @@ class UcdlibDatalabJobsBoardRest {
             return is_string($param);
           }
         ],
+        'sector' => [
+          'required' => false,
+          'validate_callback' => function($param, $request, $key){
+            return is_string($param);
+          }
+        ],
+        'education' => [
+          'required' => false,
+          'validate_callback' => function($param, $request, $key){
+            return is_string($param);
+          }
+        ]
       ],
       'permission_callback' => [$this, 'routePermissionCallbackPublic']
     ]);
@@ -128,6 +140,12 @@ class UcdlibDatalabJobsBoardRest {
     $search = $request->get_param('search');
     $search = $search ? sanitize_text_field( $search ) : '';
 
+    $sector = $request->get_param('sector');
+    $sector = $sector ? sanitize_text_field( $sector ) : '';
+
+    $education = $request->get_param('education');
+    $education = $education ? sanitize_text_field( $education ) : '';
+
     $settings = $this->jobsBoard->getAdminSettings();
     $totalCt = 0;
     $query = [
@@ -135,6 +153,12 @@ class UcdlibDatalabJobsBoardRest {
     ];
     if ( $search ) {
       $query['search'] = $search;
+    }
+    if ( $sector ) {
+      $query['sector'] = $sector;
+    }
+    if ( $education ) {
+      $query['education'] = $education;
     }
     $jobs = $this->jobsBoard->form->queryJobs( $query, $totalCt );
     $formFields = $this->jobsBoard->form->getActiveFormFields(true);

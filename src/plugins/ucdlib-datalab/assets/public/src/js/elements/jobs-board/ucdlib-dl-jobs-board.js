@@ -70,6 +70,12 @@ export default class UcdlibDlJobsBoard extends LitElement {
     if (this.searchText) {
       args.search = this.searchText;
     }
+    if ( this.filterSector ) {
+      args.sector = this.filterSector;
+    }
+    if ( this.filterEducation ) {
+      args.education = this.filterEducation;
+    }
     const response = await this.api.get('jobs', args);
     if ( response.status !== 'success' ) {
       console.error(response.error);
