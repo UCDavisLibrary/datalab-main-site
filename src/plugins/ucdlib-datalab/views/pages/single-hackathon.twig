@@ -1,0 +1,16 @@
+{% extends getUcdTemplate('base') %}
+
+{% block content_container %}
+  <div class="l-container l-basic--flipped">
+    <div class="l-content">
+      <h2>{{post.pageTitle}}</h2>
+      {{post.content}}
+    </div>
+
+    <div class="l-sidebar-second">
+      {% if sidebar %}
+        {{sidebar}}
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

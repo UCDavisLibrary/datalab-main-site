@@ -3,6 +3,7 @@
 require_once( __DIR__ . '/assets.php' );
 require_once( __DIR__ . '/blocks.php' );
 require_once( __DIR__ . '/config.php' );
+require_once( __DIR__ . '/hackathons/main.php' );
 require_once( __DIR__ . '/hummingbird.php' );
 require_once( __DIR__ . '/jobs-board/main.php' );
 require_once( __DIR__ . '/projects/main.php' );
@@ -16,6 +17,7 @@ class UcdlibDatalab {
   public $utils;
   public $assets;
   public $blocks;
+  public $hackathons;
   public $hummingbird;
   public $jobsBoard;
   public $projects;
@@ -30,6 +32,7 @@ class UcdlibDatalab {
 
     $this->assets = new UcdlibDatalabAssets( $this );
     $this->blocks = new UcdlibDatalabBlocks( $this );
+    $this->hackathons = new UcdlibDatalabHackathons( $this );
     $this->hummingbird = new UcdlibDatalabHummingbird( $this );
     $this->jobsBoard = new UcdlibDatalabJobsBoard( $this );
     $this->projects = new UcdlibDatalabProjects( $this );
