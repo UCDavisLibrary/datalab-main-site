@@ -5,6 +5,7 @@ import customBlocks from "./lib/blocks";
 import { select } from "@wordpress/data";
 
 import projectSettings from "./lib/plugins/project-settings";
+import hackathonSettings from "./lib/plugins/hackathon-settings";
 
 customBlocks.forEach(block => {
   registerBlockType( block.name, block.settings );
@@ -12,5 +13,6 @@ customBlocks.forEach(block => {
 
 if ( select('core/editor') ){
   registerPlugin( projectSettings.name, projectSettings.settings );
+  registerPlugin( hackathonSettings.name, hackathonSettings.settings );
 };
 
