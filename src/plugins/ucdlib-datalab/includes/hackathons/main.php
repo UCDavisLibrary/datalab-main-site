@@ -1,6 +1,8 @@
 <?php
 
 require_once( __DIR__ . '/hackathon-ctl.php' );
+require_once( __DIR__ . '/hackathon-type.php' );
+require_once( __DIR__ . '/rest.php' );
 
 /**
  * Main class for setting up Datalab data challenges and hackathons post type and taxonomies
@@ -10,11 +12,13 @@ class UcdlibDatalabHackathons {
   public $slugs = [
     'hackathon' => 'hackathon',
     'taxonomies' => [
+      'type' => 'hackathon-type'
     ],
     'meta' => [
       'landingPageTitle' => 'hackathonLandingPageTitle',
       'startDate' => 'hackathonStartDate',
-      'endDate' => 'hackathonEndDate'
+      'endDate' => 'hackathonEndDate',
+      'excerpt' => 'hackathonExcerpt'
     ]
   ];
 
@@ -23,6 +27,8 @@ class UcdlibDatalabHackathons {
   public $hackathonsPostId = '2037';
 
   public $ctl;
+  public $rest;
+  public $typeTaxonomy;
 
   public function __construct( $plugin, $init=true ){
     $this->plugin = $plugin;
@@ -39,5 +45,11 @@ class UcdlibDatalabHackathons {
 
     // controller for registering the post type
     $this->ctl = new UcdlibDatalabHackathonsCtl( $this );
+
+    // rest api for hackathons
+    $this->rest = new UcdlibDatalabHackathonsRest( $this );
+
+    // taxonomy for hackathon types
+    $this->typeTaxonomy = new UcdlibDatalabHackathonsType( $this );
   }
 }

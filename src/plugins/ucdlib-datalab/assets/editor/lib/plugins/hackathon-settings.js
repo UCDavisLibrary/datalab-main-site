@@ -2,7 +2,7 @@ import { Fragment } from "@wordpress/element";
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import {
   CheckboxControl,
-  DatePicker,
+  DateTimePicker,
   Dropdown,
   FormTokenField,
   SelectControl,
@@ -27,6 +27,13 @@ const Edit = () => {
   const isHackathon = SelectUtils.editedPostAttribute('type') === 'hackathon';
   if ( !isHackathon )  return html`<${Fragment} />`;
 
+  // type taxonomy terms
+  const typeTerms = SelectUtils.terms('hackathon-type', {per_page: '-1', orderby: 'name', order: 'asc'});
+  const typeOptions = [
+    {value: '', label: 'Select a type', disabled: true},
+    ...typeTerms.map(l => {return {value: l.id, label: l.name}})
+  ];
+
   const {editEntityRecord} = useDispatch( 'core' );
 
   // modal state
@@ -38,25 +45,69 @@ const Edit = () => {
 
   // set up component state - set default to current post meta
   const postMeta = SelectUtils.editedPostAttribute('meta');
-  const watchedVars = [postMeta.landingPageTitle];
+  const postHackathonTypes = SelectUtils.editedPostAttribute('hackathon-type');
+  const watchedVars = [
+    postMeta.hackathonLandingPageTitle,
+    postMeta.hackathonStartDate,
+    postMeta.hackathonEndDate,
+    postMeta.hackathonExcerpt,
+    postHackathonTypes
+  ];
   const { editPost } = useDispatch( 'core/editor', watchedVars );
-  const [ landingPageTitle, setLandingPageTitle ] = useState( postMeta.landingPageTitle || 'Challenge Overview' );
+  const [ hackathonLandingPageTitle, setHackathonLandingPageTitle ] = useState( postMeta.hackathonLandingPageTitle || 'Challenge Overview' );
+  const [ hackathonStartDate, setHackathonStartDate ] = useState( postMeta.hackathonStartDate || '' );
+  const [ hackathonEndDate, setHackathonEndDate ] = useState( postMeta.hackathonEndDate || '' );
+  const [ hackathonExcerpt, setHackathonExcerpt ] = useState( postMeta.hackathonExcerpt || '' );
+  const [ hackathonTypes, setHackathonTypes ] = useState( postHackathonTypes || [] );
 
   // set component state from current page meta
   const setStateFromCurrentPage = () => {
     setLandingPageId( 0 ); // the current page is the landing page for this hackathon
-    setLandingPageTitle( postMeta.landingPageTitle );
+    setHackathonLandingPageTitle( postMeta.hackathonLandingPageTitle );
+    setHackathonStartDate( postMeta.hackathonStartDate || '' );
+    setHackathonEndDate( postMeta.hackathonEndDate || '' );
+    setHackathonExcerpt( postMeta.hackathonExcerpt || '' );
+    setHackathonTypes( postHackathonTypes || [] );
   };
 
+  // if this page has a parent, we need to find the landing page for this hackathon
+  // and then set the component state from the metadata for that page
   const parent = SelectUtils.editedPostAttribute('parent') || 0;
   const [ parentError, setParentError ] = useState( false );
   const [ landingPageId, setLandingPageId ] = useState( 0 );
+  useEffect(() => {
+    if ( !parent ) {
+      setParentError(false);
+      setStateFromCurrentPage();
+      return;
+    }
+    const path = `ucdlib-datalab/hackathon/page/${parent}`;
+    apiFetch( {path} ).then(
+      ( r ) => {
+        setParentError(false);
+        setLandingPageId( r.hackathonLandingPageId)
+        setHackathonLandingPageTitle( r.hackathonLandingPageTitle );
+        setHackathonStartDate( r.hackathonStartDate || '' );
+        setHackathonEndDate( r.hackathonEndDate || '' );
+        setHackathonExcerpt( r.hackathonExcerpt || '' );
+        setHackathonTypes( r.hackathonTypes || [] );
+      },
+      (error) => {
+        setParentError(true);
+        setStateFromCurrentPage();
+      });
+
+  }, [parent]);
 
   // save component state variables to either the current page or hackathon landing page
   const saveMetadata = () => {
     const data = {
+      'hackathon-type': hackathonTypes,
       meta: {
-        landingPageTitle
+        hackathonLandingPageTitle,
+        hackathonStartDate,
+        hackathonEndDate,
+        hackathonExcerpt
       }
     };
 
@@ -69,23 +120,104 @@ const Edit = () => {
 
   };
 
+  // startdate and enddate picker
+  const datePickerDropdown = (onDropdownClose, field) => {
+    let value = field == 'hackathonStartDate' ? hackathonStartDate : hackathonEndDate;
+    if ( value ) {
+      value = `${value}T12:00:00`;
+    }
+
+    const onChange = (v) => {
+      const d = v.split('T')[0];
+      if ( field === 'hackathonStartDate' ) {
+        setHackathonStartDate(d);
+      } else {
+        setHackathonEndDate(d);
+      }
+    }
+    const onReset = () => {
+      if ( field === 'hackathonStartDate' ) {
+        setHackathonStartDate(null);
+      } else {
+        setHackathonEndDate(null);
+      }
+      onDropdownClose();
+    }
+    return html`
+      <div>
+        <${DateTimePicker}
+          is12Hour={ true }
+          onChange=${onChange}
+          currentDate=${value}
+        />
+        <div style=${{display: 'flex', justifyContent: 'space-between', marginTop: '1rem'}}>
+          ${value && html`
+            <${Button} variant='link' isDestructive=${true} onClick=${onReset}>Reset</${Button}>
+          `}
+          <${Button} variant='link' onClick=${onDropdownClose}>Close</${Button}>
+        </div>
+      </div>
+    `;
+  }
+  const dateLabel = (d) => {
+    if ( !d ) return 'Not Set';
+    return d;
+  }
+
   return html`
     <${PluginPostStatusInfo}
       className=${name}>
       <div>
+        <style>
+          .components-datetime__time fieldset:first-child {
+            display: none !important;
+          }
+        </style>
         <${Button} onClick=${openModal} variant="primary">Edit Hackathon Metadata</${Button}>
         ${modalIsOpen && html`
           <${Modal} title='Hackathon Metadata' onRequestClose=${closeModal} shouldCloseOnClickOutside=${false}>
           ${parentError ? html`
             <div><p>There was an error when retrieving exhibit metadata. Please try again later.</p></div>
             ` : html`
-            <${TextControl}
-              label='Landing Page Title'
-              value=${landingPageTitle}
-              onChange=${(v) => setLandingPageTitle(v)}
-            />
+              <${TextControl}
+                label='Landing Page Title'
+                value=${hackathonLandingPageTitle}
+                onChange=${(v) => setHackathonLandingPageTitle(v)}
+              />
+              <${SelectControl}
+                label='Type'
+                options=${typeOptions}
+                value=${hackathonTypes.length ? hackathonTypes[0] : ''}
+                onChange=${id => setHackathonTypes([id])}
+              />
+              <div style=${{marginBottom: '1rem'}}>
+                <${Dropdown}
+                  renderToggle=${({onToggle }) => html`
+                    <div onClick=${onToggle} style=${{cursor:'pointer'}}>
+                      <span>Start Date: </span>
+                      <span className='components-button is-link'>${dateLabel(hackathonStartDate)}</span>
+                    </div>
+                  `}
+                  renderContent=${({ onClose }) => datePickerDropdown(onClose, 'hackathonStartDate')}
+                />
+              </div>
+              <div style=${{marginBottom: '1rem'}}>
+                <${Dropdown}
+                  renderToggle=${({onToggle }) => html`
+                    <div onClick=${onToggle} style=${{cursor:'pointer'}}>
+                      <span>End Date: </span>
+                      <span className='components-button is-link'>${dateLabel(hackathonEndDate)}</span>
+                    </div>
+                  `}
+                  renderContent=${({ onClose }) => datePickerDropdown(onClose, 'hackathonEndDate')}
+                />
+              </div>
+              <${TextareaControl}
+                label="Excerpt"
+                value=${hackathonExcerpt}
+                onChange=${(v) => setHackathonExcerpt(v)}
+              />
             `}
-
 
             <div style=${{marginTop: '20px', marginBottom: '10px'}}>
               <${Button} onClick=${saveMetadata} variant="primary">Save</${Button}>

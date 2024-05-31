@@ -19,6 +19,18 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
     return $this->landingPage;
   }
 
+  public function landingPageUrl(){
+    return $this->landingPage()->link();
+  }
+
+  public function landingPageId(){
+    return $this->landingPage()->id;
+  }
+
+  public function landingPageTitle(){
+    return $this->landingPage()->meta('hackathonLandingPageTitle');
+  }
+
   protected $isLandingPage;
   public function isLandingPage() {
     if ( ! empty( $this->isLandingPage ) ) {
@@ -56,6 +68,56 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
     $ancestor = $this->landingPage();
     $this->hackathonTitle = $this->landingPage()->title();
     return $this->hackathonTitle;
+  }
+
+  protected $hackathonExcerpt;
+  public function hackathonExcerpt(){
+    if ( ! empty( $this->hackathonExcerpt ) ) {
+      return $this->hackathonExcerpt;
+    }
+    $this->hackathonExcerpt = $this->landingPage()->meta('hackathonExcerpt');
+    return $this->hackathonExcerpt;
+  }
+
+  protected $hackathonStartDate;
+  public function hackathonStartDate(){
+    if ( ! empty( $this->hackathonStartDate ) ) {
+      return $this->hackathonStartDate;
+    }
+    $this->hackathonStartDate = $this->landingPage()->meta('hackathonStartDate');
+    return $this->hackathonStartDate;
+  }
+
+  protected $hackathonEndDate;
+  public function hackathonEndDate(){
+    if ( ! empty( $this->hackathonEndDate ) ) {
+      return $this->hackathonEndDate;
+    }
+    $this->hackathonEndDate = $this->landingPage()->meta('hackathonEndDate');
+    return $this->hackathonEndDate;
+  }
+
+  protected $hackathonTypes;
+  public function hackathonTypes(){
+    if ( ! empty( $this->hackathonTypes ) ) {
+      return $this->hackathonTypes;
+    }
+    $this->hackathonTypes = $this->landingPage()->terms(['taxonomy' => 'hackathon-type']);
+    return $this->hackathonTypes;
+  }
+
+  // return basic metadata for a hackathon
+  public function hackathonMeta(){
+    return [
+      'hackathonLandingPageTitle' => $this->landingPageTitle(),
+      'hackathonLandingPageUrl' => $this->landingPageUrl(),
+      'hackathonLandingPageId' => $this->landingPageId(),
+      'hackathonTitle' => $this->hackathonTitle(),
+      'hackathonStartDate' => $this->hackathonStartDate(),
+      'hackathonEndDate' => $this->hackathonEndDate(),
+      'hackathonExcerpt' => $this->hackathonExcerpt(),
+      'hackathonTypes' => $this->hackathonTypes()
+    ];
   }
 
 }

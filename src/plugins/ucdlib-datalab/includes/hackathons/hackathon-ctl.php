@@ -83,6 +83,17 @@ class UcdlibDatalabHackathonsCtl {
 
     register_post_meta(
       $slug,
+      $metaSlugs['excerpt'],
+      [
+        'show_in_rest' => true,
+        'single' => true,
+        'default' => '',
+        'type' => 'string',
+      ]
+    );
+
+    register_post_meta(
+      $slug,
       $metaSlugs['startDate'],
       [
         'show_in_rest' => true,
