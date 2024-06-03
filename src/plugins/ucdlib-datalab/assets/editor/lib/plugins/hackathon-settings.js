@@ -1,10 +1,8 @@
 import { Fragment } from "@wordpress/element";
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import {
-  CheckboxControl,
   DateTimePicker,
   Dropdown,
-  FormTokenField,
   SelectControl,
   TextControl,
   TextareaControl,
@@ -51,6 +49,10 @@ const Edit = () => {
     postMeta.hackathonStartDate,
     postMeta.hackathonEndDate,
     postMeta.hackathonExcerpt,
+    postMeta.hackathonHostedByExternal,
+    postMeta.hackathonContactEmail,
+    postMeta.hackathonContactUrl,
+    postMeta.showGrandchildrenInNav,
     postHackathonTypes
   ];
   const { editPost } = useDispatch( 'core/editor', watchedVars );
@@ -59,6 +61,10 @@ const Edit = () => {
   const [ hackathonEndDate, setHackathonEndDate ] = useState( postMeta.hackathonEndDate || '' );
   const [ hackathonExcerpt, setHackathonExcerpt ] = useState( postMeta.hackathonExcerpt || '' );
   const [ hackathonTypes, setHackathonTypes ] = useState( postHackathonTypes || [] );
+  const [ hackathonHostedByExternal, setHackathonHostedByExternal ] = useState( postMeta.hackathonHostedByExternal || false );
+  const [ hackathonContactEmail, setHackathonContactEmail ] = useState( postMeta.hackathonContactEmail || '' );
+  const [ hackathonContactUrl, setHackathonContactUrl ] = useState( postMeta.hackathonContactUrl || '' );
+  const [ showGrandchildrenInNav, setShowGrandchildrenInNav ] = useState( postMeta.showGrandchildrenInNav || false );
 
   // set component state from current page meta
   const setStateFromCurrentPage = () => {
@@ -67,6 +73,10 @@ const Edit = () => {
     setHackathonStartDate( postMeta.hackathonStartDate || '' );
     setHackathonEndDate( postMeta.hackathonEndDate || '' );
     setHackathonExcerpt( postMeta.hackathonExcerpt || '' );
+    setHackathonHostedByExternal( postMeta.hackathonHostedByExternal || false);
+    setHackathonContactEmail( postMeta.hackathonContactEmail || '' );
+    setHackathonContactUrl( postMeta.hackathonContactUrl || '' );
+    setShowGrandchildrenInNav( postMeta.showGrandchildrenInNav || false );
     setHackathonTypes( postHackathonTypes || [] );
   };
 
@@ -90,7 +100,11 @@ const Edit = () => {
         setHackathonStartDate( r.hackathonStartDate || '' );
         setHackathonEndDate( r.hackathonEndDate || '' );
         setHackathonExcerpt( r.hackathonExcerpt || '' );
-        setHackathonTypes( r.hackathonTypes || [] );
+        setHackathonHostedByExternal( r.hackathonHostedByExternal || false);
+        setHackathonContactEmail( r.hackathonContactEmail || '' );
+        setHackathonContactUrl( r.hackathonContactUrl || '' );
+        setHackathonTypes( (r.hackathonTypes || []).map(t => t.id) );
+        setShowGrandchildrenInNav( r.showGrandchildrenInNav || false );
       },
       (error) => {
         setParentError(true);
@@ -98,6 +112,8 @@ const Edit = () => {
       });
 
   }, [parent]);
+
+  SelectUtils.post( landingPageId, 'hackathon');
 
   // save component state variables to either the current page or hackathon landing page
   const saveMetadata = () => {
@@ -107,7 +123,11 @@ const Edit = () => {
         hackathonLandingPageTitle,
         hackathonStartDate,
         hackathonEndDate,
-        hackathonExcerpt
+        hackathonExcerpt,
+        hackathonHostedByExternal,
+        hackathonContactEmail,
+        hackathonContactUrl,
+        showGrandchildrenInNav
       }
     };
 
@@ -217,6 +237,34 @@ const Edit = () => {
                 value=${hackathonExcerpt}
                 onChange=${(v) => setHackathonExcerpt(v)}
               />
+              <div style=${{marginTop: '1rem'}}>
+                <${ToggleControl}
+                  label='Hosted by External Organization'
+                  checked=${hackathonHostedByExternal}
+                  onChange=${() => setHackathonHostedByExternal(!hackathonHostedByExternal)}
+                />
+              </div>
+              ${hackathonHostedByExternal && html`
+                <div>
+                  <${TextControl}
+                    label='Contact Email'
+                    value=${hackathonContactEmail}
+                    onChange=${(v) => setHackathonContactEmail(v)}
+                  />
+                  <${TextControl}
+                    label='Contact URL'
+                    value=${hackathonContactUrl}
+                    onChange=${(v) => setHackathonContactUrl(v)}
+                  />
+                </div>
+              `}
+              <div style=${{marginTop: '1rem'}}>
+                <${ToggleControl}
+                  label='Show grandchildren pages in navigation'
+                  checked=${showGrandchildrenInNav}
+                  onChange=${() => setShowGrandchildrenInNav(!showGrandchildrenInNav)}
+                />
+              </div>
             `}
 
             <div style=${{marginTop: '20px', marginBottom: '10px'}}>

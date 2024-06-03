@@ -1,0 +1,19 @@
+{% from getUcdMacro('menus') import subnav %}
+{% set post = siteContext.post %}
+{% if post and post.hackathonIsHierarchical %}
+
+
+  {% set kwargs = {
+    items: [{title: post.landingPageTitle, link: post.landingPageUrl}]|merge(post.landingPage.children),
+    oBox: false,
+    panel: false,
+    show_children: post.showGrandchildrenInNav
+    }
+  %}
+  <aside class="o-box panel">
+    <h2 class='heading--highlight u-space-mb'>{{post.hackathonTitle}}</h2>
+    {{ subnav( kwargs ) }}
+  </aside>
+
+
+{% endif %}

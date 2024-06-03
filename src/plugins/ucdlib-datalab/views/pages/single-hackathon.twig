@@ -5,6 +5,19 @@
     <div class="l-content">
       <h2>{{post.pageTitle}}</h2>
       {{post.content}}
+
+      {% if (post.showGrandchildrenInNav or not post.isDeepPage) and (post.prevPage or post.nextPage) %}
+        <hr class="dotted secondary y2">
+        <div class='btn--seq-container {{not post.prevPage ? 'btn--seq-container-first'}}'>
+        {% if post.prevPage %}
+          <a href="{{post.prevPage.link}}" class="btn btn--seq btn--seq__prev">{{post.prevPage.pageTitle}}</a>
+        {% endif %}
+
+        {% if post.nextPage %}
+          <a href="{{post.nextPage.link}}" class="btn btn--seq btn--seq__next">{{post.nextPage.pageTitle}}</a>
+        {% endif %}
+        </div>
+      {% endif %}
     </div>
 
     <div class="l-sidebar-second">

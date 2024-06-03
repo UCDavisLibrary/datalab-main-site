@@ -13,6 +13,7 @@ class UcdlibDatalabHackathonsCtl {
     add_action( 'init', [$this, 'register'] );
     add_action( 'init', [$this, 'registerPostMeta'] );
     add_filter( 'ucd-theme/post/breadcrumbs/custom_parent', [$this, 'setCustomParentPage'], 10, 2 );
+    add_filter( 'ucd-theme/post/breadcrumbs/text', [$this, 'setCustomBreadcrumbText'], 10, 2 );
     add_action( 'widgets_init', [$this, 'registerSidebar'] );
     add_filter( 'ucd-theme/templates/single', [$this, 'setTemplate'], 10, 2 );
     add_filter( 'ucd-theme/context/single', [$this, 'setContext'] );
@@ -94,6 +95,50 @@ class UcdlibDatalabHackathonsCtl {
 
     register_post_meta(
       $slug,
+      $metaSlugs['showGrandchildrenInNav'],
+      [
+        'show_in_rest' => true,
+        'single' => true,
+        'default' => false,
+        'type' => 'boolean',
+      ]
+    );
+
+    register_post_meta(
+      $slug,
+      $metaSlugs['hostedByExternal'],
+      [
+        'show_in_rest' => true,
+        'single' => true,
+        'default' => false,
+        'type' => 'boolean',
+      ]
+    );
+
+    register_post_meta(
+      $slug,
+      $metaSlugs['contactEmail'],
+      [
+        'show_in_rest' => true,
+        'single' => true,
+        'default' => '',
+        'type' => 'string',
+      ]
+    );
+
+    register_post_meta(
+      $slug,
+      $metaSlugs['contactUrl'],
+      [
+        'show_in_rest' => true,
+        'single' => true,
+        'default' => '',
+        'type' => 'string',
+      ]
+    );
+
+    register_post_meta(
+      $slug,
       $metaSlugs['startDate'],
       [
         'show_in_rest' => true,
@@ -121,6 +166,13 @@ class UcdlibDatalabHackathonsCtl {
     if ( $post->post_type == $this->hackathons->slugs['hackathon'] )
       return $this->hackathons->hackathonsMenuId;
     return $value;
+  }
+
+  public function setCustomBreadcrumbText($value, $post){
+    if ( $post->post_type != $this->hackathons->slugs['hackathon'] ){
+      return $value;
+    }
+    return $post->hackathonTitle();
   }
 
   // register sidebar widget area for single hackathon

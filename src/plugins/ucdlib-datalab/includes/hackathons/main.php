@@ -18,7 +18,11 @@ class UcdlibDatalabHackathons {
       'landingPageTitle' => 'hackathonLandingPageTitle',
       'startDate' => 'hackathonStartDate',
       'endDate' => 'hackathonEndDate',
-      'excerpt' => 'hackathonExcerpt'
+      'excerpt' => 'hackathonExcerpt',
+      'hostedByExternal' => 'hackathonHostedByExternal',
+      'contactEmail' => 'hackathonContactEmail',
+      'contactUrl' => 'hackathonContactUrl',
+      'showGrandchildrenInNav' => 'showGrandchildrenInNav'
     ]
   ];
 

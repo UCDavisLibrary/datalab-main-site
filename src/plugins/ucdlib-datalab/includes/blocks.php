@@ -28,6 +28,13 @@ class UcdlibDatalabBlocks extends UCDThemeBlockRenderer {
     'ucdlib-datalab/projects' => [
       'twig' => '@ucdlib-datalab/blocks/projects.twig',
       'transform' => ['getProjectsElementProps']
+    ],
+    'ucdlib-datalab/hackathon-subnav' => [
+      'twig' => '@ucdlib-datalab/blocks/hackathon-subnav.twig'
+    ],
+    'ucdlib-datalab/hackathon-contact' => [
+      'twig' => '@ucdlib-datalab/blocks/hackathon-contact.twig',
+      'transform' => ['getHackathonContact']
     ]
   ];
 

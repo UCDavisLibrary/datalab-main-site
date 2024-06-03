@@ -1,0 +1,21 @@
+{% if attributes.hasContact %}
+  <div class='o-box u-space-mb'>
+    <div class='hackathon-contact'>
+      <h4>Contact Info</h4>
+      {% if attributes.hostedExternally %}
+        <p>For more information regarding this event, please refer to the hosting organization’s website. </p>
+      {% else %}
+        <p>Have questions about this event? Email us!</p>
+      {% endif %}
+      <ul class="list--reset">
+        {% for contact in attributes.contact %}
+          <li>
+            <a class="icon-ucdlib" href="{{contact.link}}">
+              <ucdlib-icon icon="{{contact.icon}}"></ucdlib-icon><div>{{contact.value}}</div>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}

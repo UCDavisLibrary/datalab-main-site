@@ -30,4 +30,44 @@ class UcdlibDatalabBlockTransformations {
     $attrs['eleProps'] = $props;
     return $attrs;
   }
+
+  public static function getHackathonContact($attrs=[]){
+    $post = Timber::get_post();
+    if ( ! $post ) return $attrs;
+    $contact = [];
+    if ( $post->hackathonHostedByExternal() ){
+
+      if ( $post->hackathonContactUrl() ){
+        $contact[] = [
+          'type' => 'url',
+          'value' => $post->hackathonContactUrl(),
+          'icon' => 'ucd-public:fa-network-wired'
+        ];
+      }
+
+      if ( $post->hackathonContactEmail() ){
+        $contact[] = [
+          'type' => 'email',
+          'value' => $post->hackathonContactEmail(),
+          'link' => 'mailto:' . $post->hackathonContactEmail(),
+          'icon' => 'ucd-public:fa-envelope'
+        ];
+      }
+
+    } else {
+      $contact[] = [
+        'type' => 'email',
+        'value' => 'datalab@ucdavis.edu',
+        'link' => 'mailto:datalab@ucdavis.edu',
+        'icon' => 'ucd-public:fa-envelope'
+      ];
+    }
+
+    $attrs['contact'] = $contact;
+    $attrs['hasContact'] = count($contact) > 0;
+    $attrs['hostedExternally'] = $post->hackathonHostedByExternal();
+    $attrs['icons'] = ['ucd-public:fa-network-wired', 'ucd-public:fa-envelope'];
+
+    return $attrs;
+  }
 }
