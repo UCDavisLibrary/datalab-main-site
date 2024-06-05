@@ -31,6 +31,25 @@ class UcdlibDatalabBlockTransformations {
     return $attrs;
   }
 
+  /**
+   * Construct json object to be passed to hackathon search element for initial state
+   */
+  public static function getHackathonsElementProps($attrs=array()){
+    $model = UcdlibDatalabHackathonsModel::class;
+    $props = [
+      'typeFilters' => array_values($model::getAllTypes(true)),
+      'yearFilters' => array_values($model::getAllStartYears()),
+      'restNamespace' => 'ucdlib-datalab/hackathon',
+    ];
+
+    if (isset($GLOBALS['UcdSite'])){
+      $props['defaultImage'] = $GLOBALS['UcdSite']->customBlocks->getImageByAspectRatio('4x3');
+    }
+
+    $attrs['eleProps'] = $props;
+    return $attrs;
+  }
+
   public static function getHackathonContact($attrs=[]){
     $post = Timber::get_post();
     if ( ! $post ) return $attrs;

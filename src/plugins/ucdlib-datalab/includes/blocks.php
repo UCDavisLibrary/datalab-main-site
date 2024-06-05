@@ -18,6 +18,10 @@ class UcdlibDatalabBlocks extends UCDThemeBlockRenderer {
   public static $transformationClass = 'UcdlibDatalabBlockTransformations';
 
   public static $registry = [
+    'ucdlib-datalab/hackathons' => [
+      'twig' => '@ucdlib-datalab/blocks/hackathons.twig',
+      'transform' => ['getHackathonsElementProps']
+    ],
     'ucdlib-datalab/jobs-board' => [
       'twig' => '@ucdlib-datalab/blocks/jobs-board.twig'
     ],

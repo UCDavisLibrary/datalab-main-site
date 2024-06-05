@@ -16,6 +16,10 @@ class DynamicScriptLoader {
       {
         name: 'projects',
         cssQuery: ['ucdlib-dl-projects']
+      },
+      {
+        name: 'hackathons',
+        cssQuery: ['ucdlib-dl-hackathons']
       }
     ];
   }
@@ -46,6 +50,8 @@ class DynamicScriptLoader {
       this.loaded[bundleName] = import(/* webpackChunkName: "jobs-board" */ './elements/jobs-board/ucdlib-dl-jobs-board.js');
     } else if ( bundleName == 'projects' ){
       this.loaded[bundleName] = import(/* webpackChunkName: "projects" */ './elements/projects/ucdlib-dl-projects.js');
+    } else if ( bundleName == 'hackathons' ){
+      this.loaded[bundleName] = import(/* webpackChunkName: "hackathons" */ './elements/hackathons/index.js');
     }
     return this.loaded[bundleName]
   }

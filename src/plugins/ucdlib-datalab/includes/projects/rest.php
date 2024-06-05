@@ -66,6 +66,6 @@ class UcdlibDatalabProjectsRest {
       'results' => $results['results']
     ];
 
-    return $out;
+    return rest_ensure_response($out);
   }
 }

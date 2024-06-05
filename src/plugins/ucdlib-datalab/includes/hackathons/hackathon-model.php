@@ -140,12 +140,59 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
   }
 
   protected $hackathonTypes;
-  public function hackathonTypes(){
+  public function hackathonTypes($brief=false){
     if ( ! empty( $this->hackathonTypes ) ) {
-      return $this->hackathonTypes;
+      $hackathonTypes = $this->hackathonTypes;
     }
-    $this->hackathonTypes = $this->landingPage()->terms(['taxonomy' => 'hackathon-type']);
+    $hackathonTypes = $this->landingPage()->terms(['taxonomy' => 'hackathon-type']);
+    if ($brief){
+      $out = [];
+      foreach ($hackathonTypes as $term) {
+        $out[] = [
+          'id' => $term->term_id,
+          'name' => $term->name,
+          'slug' => $term->slug
+        ];
+      }
+      return $out;
+    }
+    $this->hackathonTypes = $hackathonTypes;
     return $this->hackathonTypes;
+  }
+
+  public static function getAllTypes($brief=false){
+    $mainClass = new UcdlibDatalabHackathons(null, false);
+    $terms = Timber::get_terms([
+      'taxonomy' => $mainClass->slugs['taxonomies']['type'],
+      'hide_empty' => true
+    ]);
+    if ($brief){
+      $out = [];
+      foreach ($terms as $term) {
+        $out[] = [
+          'id' => $term->term_id,
+          'name' => $term->name,
+          'slug' => $term->slug
+        ];
+      }
+      return $out;
+    }
+    return $terms;
+  }
+
+  /**
+   * Gets unique list of years for the hackathon post type using hackathonStartDate meta value
+   */
+  public static function getAllStartYears(){
+    global $wpdb;
+    $query = "SELECT DISTINCT YEAR(meta_value) as year FROM $wpdb->postmeta WHERE meta_key = 'hackathonStartDate' ORDER BY year DESC";
+    $results = $wpdb->get_results($query);
+    $years = [];
+    foreach ($results as $result) {
+      $years[] = $result->year;
+    }
+    rsort($years);
+    return $years;
   }
 
   // return basic metadata for a hackathon
@@ -161,7 +208,7 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
       'hackathonHostedByExternal' => $this->hackathonHostedByExternal(),
       'hackathonContactEmail' => $this->hackathonContactEmail(),
       'hackathonContactUrl' => $this->hackathonContactUrl(),
-      'hackathonTypes' => $this->hackathonTypes(),
+      'hackathonTypes' => $this->hackathonTypes(true),
       'showGrandchildrenInNav' => $this->showGrandchildrenInNav()
     ];
   }
@@ -255,5 +302,67 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
 
     return $this->prevPage;
   }
+
+  public static function getPastHackathons($kwargs){
+    $mainClass = new UcdlibDatalabHackathons(null, false);
+    $q = [
+      'post_type' => $mainClass->slugs['hackathon'],
+      'posts_per_page' => $mainClass->resultsPerPage,
+      'post_parent' => 0,
+      'paged' => 1,
+      'orderby' => 'meta_value',
+      'order' => 'DESC',
+      'meta_query' => [
+        [
+          'key' => $mainClass->slugs['meta']['endDate'],
+          'value' => date('Y-m-d'),
+          'compare' => '<',
+          'type' => 'DATE'
+        ]
+      ],
+      'tax_query' => [],
+      'meta_key' => $mainClass->slugs['meta']['startDate'],
+      'meta_type' => 'DATE'
+    ];
+
+    if (isset($kwargs['paged'])){
+      $q['paged'] = $kwargs['paged'];
+    }
+
+    if ( isset($kwargs['orderby']) && $kwargs['orderby'] == 'title' ){
+      $q['orderby'] = 'title';
+      $q['order'] = 'ASC';
+    }
+
+    if ( !empty($kwargs['type']) ){
+      $q['tax_query'][] = [
+        'taxonomy' => $mainClass->slugs['taxonomies']['type'],
+        'field' => 'slug',
+        'terms' => $kwargs['type']
+      ];
+    }
+
+    if (!empty($kwargs['start-year'])){
+      $q['meta_query'][] = [
+        'key' => $mainClass->slugs['meta']['startDate'],
+        'value' => $kwargs['start-year'],
+        'compare' => 'LIKE'
+      ];
+    }
+
+    $results = [];
+    $posts = Timber::get_posts($q);
+    $foundPosts = $posts->found_posts;
+    foreach ($posts as $post) {
+      $results[] = $post->hackathonMeta();
+    }
+
+    return [
+      'foundPosts' => $foundPosts,
+      'results' => $results
+    ];
+  }
+
+
 
 }

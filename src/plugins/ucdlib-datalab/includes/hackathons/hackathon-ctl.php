@@ -14,6 +14,8 @@ class UcdlibDatalabHackathonsCtl {
     add_action( 'init', [$this, 'registerPostMeta'] );
     add_filter( 'ucd-theme/post/breadcrumbs/custom_parent', [$this, 'setCustomParentPage'], 10, 2 );
     add_filter( 'ucd-theme/post/breadcrumbs/text', [$this, 'setCustomBreadcrumbText'], 10, 2 );
+    add_filter( 'manage_' . $this->hackathons->slugs['hackathon'] . '_posts_columns', [$this, 'addAdminColumns'] );
+    add_action( 'manage_' . $this->hackathons->slugs['hackathon'] . '_posts_custom_column', [$this, 'addAdminColumnContent'], 10, 2 );
     add_action( 'widgets_init', [$this, 'registerSidebar'] );
     add_filter( 'ucd-theme/templates/single', [$this, 'setTemplate'], 10, 2 );
     add_filter( 'ucd-theme/context/single', [$this, 'setContext'] );
@@ -202,5 +204,20 @@ class UcdlibDatalabHackathonsCtl {
 
     $context['sidebar'] = trim(Timber::get_widgets( 'single-' . $this->hackathons->slugs['hackathon'] ));
     return $context;
+  }
+
+  public function addAdminColumns($columns){
+    $columns['startDate'] = 'Start Date';
+    $columns['endDate'] = 'End Date';
+    return $columns;
+  }
+
+  public function addAdminColumnContent($column, $post_id){
+    if ( $column == 'startDate' ){
+      echo get_post_meta($post_id, $this->hackathons->slugs['meta']['startDate'], true);
+    }
+    if ( $column == 'endDate' ){
+      echo get_post_meta($post_id, $this->hackathons->slugs['meta']['endDate'], true);
+    }
   }
 }
