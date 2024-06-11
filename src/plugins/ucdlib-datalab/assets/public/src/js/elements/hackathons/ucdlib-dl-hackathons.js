@@ -19,7 +19,8 @@ export default class UcdlibDlHackathons extends LitElement {
       status: {state: true},
       results: {state: true},
       totalPages: {state: true},
-      errorMessage: {state: true}
+      errorMessage: {state: true},
+      defaultImage: {state: true}
     }
   }
 

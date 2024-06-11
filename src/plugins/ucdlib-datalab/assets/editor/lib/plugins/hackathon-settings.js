@@ -16,6 +16,7 @@ import { useDispatch } from "@wordpress/data";
 import apiFetch from '@wordpress/api-fetch';
 
 import { html, SelectUtils } from "@ucd-lib/brand-theme-editor/lib/utils";
+import { ImagePicker } from "@ucd-lib/brand-theme-editor/lib/block-components";
 
 const name = 'ucdlib-datalab-hackathon-settings';
 
@@ -53,6 +54,8 @@ const Edit = () => {
     postMeta.hackathonContactEmail,
     postMeta.hackathonContactUrl,
     postMeta.showGrandchildrenInNav,
+    postMeta.ucd_thumbnail_1x1,
+    postMeta.ucd_thumbnail_4x3,
     postHackathonTypes
   ];
   const { editPost } = useDispatch( 'core/editor', watchedVars );
@@ -65,6 +68,11 @@ const Edit = () => {
   const [ hackathonContactEmail, setHackathonContactEmail ] = useState( postMeta.hackathonContactEmail || '' );
   const [ hackathonContactUrl, setHackathonContactUrl ] = useState( postMeta.hackathonContactUrl || '' );
   const [ showGrandchildrenInNav, setShowGrandchildrenInNav ] = useState( postMeta.showGrandchildrenInNav || false );
+  const [ hackathonTeaserImage, setHackathonTeaserImage ] = useState( postMeta.ucd_thumbnail_1x1 || 0 );
+  const [ hackathonCardImage, setHackathonCardImage ] = useState( postMeta.ucd_thumbnail_4x3 || 0 );
+
+  const teaserImageObject = SelectUtils.image(hackathonTeaserImage);
+  const cardImageObject = SelectUtils.image(hackathonCardImage);
 
   // set component state from current page meta
   const setStateFromCurrentPage = () => {
@@ -78,6 +86,8 @@ const Edit = () => {
     setHackathonContactUrl( postMeta.hackathonContactUrl || '' );
     setShowGrandchildrenInNav( postMeta.showGrandchildrenInNav || false );
     setHackathonTypes( postHackathonTypes || [] );
+    setHackathonTeaserImage( postMeta.ucd_thumbnail_1x1 || 0)
+    setHackathonCardImage( postMeta.ucd_thumbnail_4x3 || 0)
   };
 
   // if this page has a parent, we need to find the landing page for this hackathon
@@ -105,6 +115,8 @@ const Edit = () => {
         setHackathonContactUrl( r.hackathonContactUrl || '' );
         setHackathonTypes( (r.hackathonTypes || []).map(t => t.id) );
         setShowGrandchildrenInNav( r.showGrandchildrenInNav || false );
+        setHackathonTeaserImage( r.hackathonTeaserImageId || 0);
+        setHackathonCardImage( r.hackathonCardImageId || 0);
       },
       (error) => {
         setParentError(true);
@@ -127,7 +139,9 @@ const Edit = () => {
         hackathonHostedByExternal,
         hackathonContactEmail,
         hackathonContactUrl,
-        showGrandchildrenInNav
+        showGrandchildrenInNav,
+        ucd_thumbnail_1x1: hackathonTeaserImage,
+        ucd_thumbnail_4x3: hackathonCardImage
       }
     };
 
@@ -258,6 +272,26 @@ const Edit = () => {
                   />
                 </div>
               `}
+              <div style=${{marginTop: '1rem', marginBottom: '1rem'}}>
+                <h3>Images</h3>
+                <h4>Teaser Image</h4>
+                <${ImagePicker}
+                  imageId=${hackathonTeaserImage}
+                  image=${teaserImageObject}
+                  onSelect=${(image) => setHackathonTeaserImage(image.id)}
+                  onRemove=${() => setHackathonTeaserImage(0)}
+                  notPanel=${true}
+                />
+                <h4>Card Image</h4>
+                <${ImagePicker}
+                  imageId=${hackathonCardImage}
+                  image=${cardImageObject}
+                  onSelect=${(image) => setHackathonCardImage(image.id)}
+                  onRemove=${() => setHackathonCardImage(0)}
+                  notPanel=${true}
+                />
+              </div>
+
               <div style=${{marginTop: '1rem'}}>
                 <${ToggleControl}
                   label='Show grandchildren pages in navigation'

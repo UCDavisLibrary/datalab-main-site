@@ -1,0 +1,40 @@
+<div class='current-hackathons'>
+  {% if attributes.posts %}
+    {% for row in attributes.posts %}
+      <div class='l-2col'>
+        {% for post in row %}
+          <div class="{{loop.first ? 'l-first' : 'l-second'}}">
+            <div class='hackathon-card'>
+
+              {% if post.card_image %}
+               {% set imgSrc = post.card_image.src %}
+                {% set imgAlt = post.card_image.alt %}
+              {% else %}
+                {% set imgSrc = DefaultImageByAspectRatio('4x3') %}
+                {% set imgAlt = '' %}
+              {% endif %}
+
+
+              <a href="{{ post.link }}">
+                <div class="aspect--16x9 u-background-image" role='img' aria-label='{{imgAlt}}' style="background-image:url({{imgSrc}});"></div>
+              </a>
+              <h3 class='vm-teaser__title'><a href='{{post.link}}'>{{ post.title }}</a></h3>
+              <div>
+                <div class='hackathon-card__type'>{{ post.terms({
+                  taxonomy: 'hackathon-type',
+                  orderby: 'name',
+                  order: 'ASC'
+                  })|join(', ') }}
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No data challenges or hackathons scheduled at this time. Please check back later!</p>
+  {% endif %}
+</div>
+
+

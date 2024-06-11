@@ -209,7 +209,11 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
       'hackathonContactEmail' => $this->hackathonContactEmail(),
       'hackathonContactUrl' => $this->hackathonContactUrl(),
       'hackathonTypes' => $this->hackathonTypes(true),
-      'showGrandchildrenInNav' => $this->showGrandchildrenInNav()
+      'showGrandchildrenInNav' => $this->showGrandchildrenInNav(),
+      'hackathonTeaserImage' => $this->teaser_image() ? $this->teaser_image()->src() : null,
+      'hackathonTeaserImageId' => $this->teaser_image() ? $this->teaser_image()->id : 0,
+      'hackathonCardImage' => $this->card_image() ? $this->card_image()->src() : null,
+      'hackathonCardImageId' => $this->card_image() ? $this->card_image()->id : 0
     ];
   }
 
@@ -301,6 +305,32 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
     }
 
     return $this->prevPage;
+  }
+
+  // retrieves all current and future hackathons based on current date
+  public static function getCurrentHackathons(){
+    $mainClass = new UcdlibDatalabHackathons(null, false);
+    $today = date('Y-m-d');
+    $q = [
+      'post_type' => $mainClass->slugs['hackathon'],
+      'posts_per_page' => -1,
+      'post_parent' => 0,
+      'orderby' => 'meta_value',
+      'order' => 'ASC',
+      'meta_query' => [
+        [
+          'key' => $mainClass->slugs['meta']['endDate'],
+          'value' => $today,
+          'compare' => '>=',
+          'type' => 'DATE'
+        ]
+      ],
+      'meta_key' => $mainClass->slugs['meta']['startDate'],
+      'meta_type' => 'DATE'
+    ];
+
+    return Timber::get_posts($q);
+
   }
 
   public static function getPastHackathons($kwargs){

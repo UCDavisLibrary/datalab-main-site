@@ -43,10 +43,20 @@ class UcdlibDatalabBlockTransformations {
     ];
 
     if (isset($GLOBALS['UcdSite'])){
-      $props['defaultImage'] = $GLOBALS['UcdSite']->customBlocks->getImageByAspectRatio('4x3');
+      $props['defaultImage'] = $GLOBALS['UcdSite']->customBlocks->getImageByAspectRatio('1x1');
     }
 
     $attrs['eleProps'] = $props;
+    return $attrs;
+  }
+
+  public static function getCurrentHackathons($attrs=[]){
+    $model = UcdlibDatalabHackathonsModel::class;
+    $posts = [];
+    foreach ($model::getCurrentHackathons() as $post) {
+      $posts[] = $post;
+    }
+    $attrs['posts'] = array_chunk($posts, 2);
     return $attrs;
   }
 

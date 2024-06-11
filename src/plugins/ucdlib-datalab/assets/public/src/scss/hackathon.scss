@@ -4,3 +4,12 @@
   background-color: $ucd-blue-30;
   padding: 2rem;
 }
+
+.hackathon-card {
+  .hackathon-card__type {
+    color: #4C4C4C;
+    font-size: .875rem;
+    font-weight: 400;
+    font-style: italic;
+  }
+}

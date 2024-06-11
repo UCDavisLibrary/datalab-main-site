@@ -35,7 +35,7 @@ export function styles() {
       margin-left: 0;
     }
     .separator {
-      margin: 2rem 0;
+      margin: 0 0 1rem;
       border-bottom: 4px dotted #FFBF00;
     }
     @media (max-width: 330px) {
@@ -62,6 +62,7 @@ export function styles() {
     }
     .result {
       margin-bottom: 1rem;
+      display: flex;
     }
     .result__content h4 a {
       text-decoration: none;
@@ -74,6 +75,23 @@ export function styles() {
       font-size: .875rem;
       color: #4C4C4C;
       margin-bottom: .5rem;
+    }
+    .result__img_container {
+      width: 20%;
+      min-width: 20%;
+      max-width: 135px;
+      margin-right: 1rem;
+    }
+    .result__img {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding-top: 100%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      text-decoration: none;
+      display: block;
     }
   `;
 
@@ -148,6 +166,15 @@ function renderResults(){
           ${result.results.map((r) => renderResult.call(this, r))}
         `)}
       </div>
+      <div ?hidden=${!this.totalPages}>
+        <ucd-theme-pagination
+          current-page="${this.currentPage}"
+          ellipses
+          xs-screen
+          @page-change=${(e) => this._onFieldInput('currentPage', e.detail.page)}
+          max-pages=${this.totalPages}>
+        </ucd-theme-pagination>
+      </div>
     </div>
   `;
 
@@ -158,12 +185,14 @@ function renderResult(result){
   const resultType = (result?.hackathonTypes || []).length ? result.hackathonTypes[0].name : '';
   return html`
     <div class='result'>
-      <div class='result__img'></div>
+      <div class='result__img_container'>
+        <a href=${result.hackathonLandingPageUrl} class='result__img' style='background-image: url(${result.hackathonTeaserImage || this.defaultImage})'></a>
+      </div>
       <div class='result__content'>
         <h4><a href=${result.hackathonLandingPageUrl}>${result.hackathonTitle}</a></h4>
+        <div class='result__type'>${resultType}</div>
+        <div class='result__excerpt'>${result.hackathonExcerpt}</div>
       </div>
-      <div class='result__type'>${resultType}</div>
-      <div class='result__excerpt'>${result.hackathonExcerpt}</div>
     </div>
   `;
 }
