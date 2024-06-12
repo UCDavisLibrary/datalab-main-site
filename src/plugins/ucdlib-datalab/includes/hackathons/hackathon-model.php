@@ -212,13 +212,13 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
   // return basic metadata for a hackathon
   public function hackathonMeta(){
     return [
-      'hackathonLandingPageTitle' => $this->landingPageTitle(),
+      'hackathonLandingPageTitle' => html_entity_decode($this->landingPageTitle()),
       'hackathonLandingPageUrl' => $this->landingPageUrl(),
       'hackathonLandingPageId' => $this->landingPageId(),
-      'hackathonTitle' => $this->hackathonTitle(),
+      'hackathonTitle' => html_entity_decode($this->hackathonTitle()),
       'hackathonStartDate' => $this->hackathonStartDate(),
       'hackathonEndDate' => $this->hackathonEndDate(),
-      'hackathonExcerpt' => $this->hackathonExcerpt(),
+      'hackathonExcerpt' => html_entity_decode($this->hackathonExcerpt()),
       'hackathonHostedByExternal' => $this->hackathonHostedByExternal(),
       'hackathonContactEmail' => $this->hackathonContactEmail(),
       'hackathonContactUrl' => $this->hackathonContactUrl(),
