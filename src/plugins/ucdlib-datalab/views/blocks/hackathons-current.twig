@@ -14,7 +14,6 @@
                 {% set imgAlt = '' %}
               {% endif %}
 
-
               <a href="{{ post.link }}">
                 <div class="aspect--16x9 u-background-image" role='img' aria-label='{{imgAlt}}' style="background-image:url({{imgSrc}});"></div>
               </a>
@@ -26,6 +25,7 @@
                   order: 'ASC'
                   })|join(', ') }}
                 </div>
+                <div class='hackathon-card__date'>{{post.hackathonDateRange}}</div>
               </div>
             </div>
           </div>

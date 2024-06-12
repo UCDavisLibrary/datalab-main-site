@@ -195,6 +195,20 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
     return $years;
   }
 
+  public function hackathonDateRange(){
+    $out = '';
+    if ( $this->hackathonStartDate() || $this->hackathonEndDate() ){
+      $dateFormat = get_option( 'date_format' );
+      $startTimestamp = strtotime($this->hackathonStartDate());
+      $out = wp_date($dateFormat, $startTimestamp, new DateTimeZone("UTC"));
+      if ( $this->hackathonEndDate() && $this->hackathonEndDate() != $this->hackathonStartDate() ){
+        $endTimestamp = strtotime($this->hackathonEndDate());
+        $out .= ' - ' . wp_date($dateFormat, $endTimestamp, new DateTimeZone("UTC"));
+      }
+    }
+    return $out;
+  }
+
   // return basic metadata for a hackathon
   public function hackathonMeta(){
     return [

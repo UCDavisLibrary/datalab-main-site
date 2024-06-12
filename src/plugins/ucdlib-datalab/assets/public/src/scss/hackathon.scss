@@ -6,10 +6,17 @@
 }
 
 .hackathon-card {
+  margin-bottom: 1rem;
+
   .hackathon-card__type {
     color: #4C4C4C;
     font-size: .875rem;
     font-weight: 400;
     font-style: italic;
+  }
+  .hackathon-card__date {
+    color: #4C4C4C;
+    font-size: .875rem;
+    font-weight: 400;
   }
 }
