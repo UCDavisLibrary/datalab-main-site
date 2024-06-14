@@ -4,6 +4,18 @@ require_once( get_template_directory() . "/includes/classes/post.php");
 
 class UcdlibDatalabHackathonsModel extends UcdThemePost {
 
+  // override children method to only return hackathon pages
+  // otherwise we get images in our nav
+  protected $children;
+  public function children($post_type = 'any'){
+    if ( ! empty( $this->children ) ) {
+      return $this->children;
+    }
+    $mainClass = new UcdlibDatalabHackathons(null, false);
+    $this->children = parent::children($mainClass->slugs['hackathon']);
+    return $this->children;
+  }
+
   // returns top-level hackathon page
   protected $landingPage;
   public function landingPage(){

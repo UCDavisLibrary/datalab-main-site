@@ -23,7 +23,7 @@ const name = 'ucdlib-datalab-hackathon-settings';
 
 const Edit = () => {
 
-  const isHackathon = SelectUtils.editedPostAttribute('type') === 'hackathon';
+  const isHackathon = SelectUtils.editedPostAttribute('type') === 'challenge';
   if ( !isHackathon )  return html`<${Fragment} />`;
 
   // type taxonomy terms
@@ -101,7 +101,7 @@ const Edit = () => {
       setStateFromCurrentPage();
       return;
     }
-    const path = `ucdlib-datalab/hackathon/page/${parent}`;
+    const path = `ucdlib-datalab/challenge/page/${parent}`;
     apiFetch( {path} ).then(
       ( r ) => {
         setParentError(false);
@@ -125,7 +125,7 @@ const Edit = () => {
 
   }, [parent]);
 
-  SelectUtils.post( landingPageId, 'hackathon');
+  SelectUtils.post( landingPageId, 'challenge');
 
   // save component state variables to either the current page or hackathon landing page
   const saveMetadata = () => {
@@ -146,7 +146,7 @@ const Edit = () => {
     };
 
     if ( landingPageId ){
-      editEntityRecord('postType', 'hackathon', landingPageId, data);
+      editEntityRecord('postType', 'challenge', landingPageId, data);
     } else {
       editPost(data);
     }
@@ -207,9 +207,9 @@ const Edit = () => {
             display: none !important;
           }
         </style>
-        <${Button} onClick=${openModal} variant="primary">Edit Hackathon Metadata</${Button}>
+        <${Button} onClick=${openModal} variant="primary">Edit Challenge Metadata</${Button}>
         ${modalIsOpen && html`
-          <${Modal} title='Hackathon Metadata' onRequestClose=${closeModal} shouldCloseOnClickOutside=${false}>
+          <${Modal} title='Challenge Metadata' onRequestClose=${closeModal} shouldCloseOnClickOutside=${false}>
           ${parentError ? html`
             <div><p>There was an error when retrieving exhibit metadata. Please try again later.</p></div>
             ` : html`

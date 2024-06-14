@@ -11,7 +11,7 @@
         {% for contact in attributes.contact %}
           <li>
             <a class="icon-ucdlib" href="{{contact.link}}">
-              <ucdlib-icon icon="{{contact.icon}}"></ucdlib-icon><div>{{contact.value}}</div>
+              <ucdlib-icon icon="{{contact.icon}}"></ucdlib-icon><div class='contact-text'>{{contact.value}}</div>
             </a>
           </li>
         {% endfor %}

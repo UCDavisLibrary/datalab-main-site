@@ -3,6 +3,11 @@
 .hackathon-contact {
   background-color: $ucd-blue-30;
   padding: 2rem;
+
+  .contact-text {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .hackathon-card {

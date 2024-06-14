@@ -1,4 +1,9 @@
 {% extends getUcdTemplate('base') %}
+{% from getUcdMacro('media') import image_title_banner %}
+
+{% block hero_image %}
+  {{ image_title_banner(post.landingPage.hero) }}
+{% endblock %}
 
 {% block content_container %}
   <div class="l-container l-basic--flipped">

@@ -53,16 +53,16 @@ class UcdlibDatalabHackathonsCtl {
   public function getLabels(){
     return [
       'name' => 'Data Challenges and Hackathons',
-      'singular_name' => 'Data Challenge',
-      'add_new' => 'Add New Data Challenge or Hackathon',
-      'add_new_item' => 'Add New Data Challenge or Hackathon',
-      'edit_item' => 'Edit Data Challenge or Hackathon',
-      'new_item' => 'New Data Challenge or Hackathon',
-      'all_items' => 'All Data Challenges and Hackathons',
-      'view_item' => 'View Data Challenge or Hackathon',
-      'search_items' => 'Search Data Challenges and Hackathons',
-      'not_found' => 'No data challenges or hackathons found',
-      'not_found_in_trash' => 'No data challenges or hackathons found in Trash',
+      'singular_name' => 'Challenge',
+      'add_new' => 'Add New Challenge',
+      'add_new_item' => 'Add New Challenge',
+      'edit_item' => 'Edit Challenge',
+      'new_item' => 'New Challenge',
+      'all_items' => 'All Challenges',
+      'view_item' => 'View Challenge',
+      'search_items' => 'Search Challenges',
+      'not_found' => 'No challenges found',
+      'not_found_in_trash' => 'No challenges found in Trash',
       'parent_item_colon' => '',
       'menu_name' => 'Data Challenges and Hackathons'
     ];

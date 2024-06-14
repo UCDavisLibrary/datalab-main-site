@@ -10,7 +10,7 @@ require_once( __DIR__ . '/rest.php' );
 class UcdlibDatalabHackathons {
   public $plugin;
   public $slugs = [
-    'hackathon' => 'hackathon',
+    'hackathon' => 'challenge',
     'taxonomies' => [
       'type' => 'hackathon-type'
     ],

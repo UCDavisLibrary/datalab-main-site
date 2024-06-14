@@ -39,7 +39,7 @@ class UcdlibDatalabBlockTransformations {
     $props = [
       'typeFilters' => array_values($model::getAllTypes(true)),
       'yearFilters' => array_values($model::getAllStartYears()),
-      'restNamespace' => 'ucdlib-datalab/hackathon',
+      'restNamespace' => 'ucdlib-datalab/challenge',
     ];
 
     if (isset($GLOBALS['UcdSite'])){
@@ -67,10 +67,17 @@ class UcdlibDatalabBlockTransformations {
     if ( $post->hackathonHostedByExternal() ){
 
       if ( $post->hackathonContactUrl() ){
+
+        $value = $post->hackathonContactUrl();
+        // remove protocol and trailing slash
+        $value = preg_replace('/^https?:\/\//', '', $value);
+        $value = preg_replace('/\/$/', '', $value);
+
         $contact[] = [
           'type' => 'url',
-          'value' => $post->hackathonContactUrl(),
-          'icon' => 'ucd-public:fa-network-wired'
+          'value' => $value,
+          'icon' => 'ucd-public:fa-network-wired',
+          'link' => $post->hackathonContactUrl()
         ];
       }
 
