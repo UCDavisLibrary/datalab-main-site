@@ -101,6 +101,32 @@ export default class UcdlibDlProjects extends LitElement {
   }
 
   /**
+   * @description Check if the search form is in the viewport
+   * @returns {Boolean} - True if the form is in the viewport
+   */
+  formIsInViewport() {
+    const form = this.renderRoot.querySelector('form');
+    if ( !form ) return false;
+    const rect = form.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  /**
+   * @description Scroll to the search form (aka the top of the element)
+   */
+  scrollToForm() {
+    const form = this.renderRoot.querySelector('form');
+    if ( form ) {
+      form.scrollIntoView({behavior: 'smooth'});
+    }
+  }
+
+  /**
    * @method setPropsFromUrl
    * @description Set element properties from url query params
    */
@@ -168,12 +194,16 @@ export default class UcdlibDlProjects extends LitElement {
    * @param {String} prop property to update
    * @param {String} value new value
    */
-  _onFieldInput(prop, value) {
+  async _onFieldInput(prop, value) {
     if ( prop !== 'currentPage' ) {
       this.currentPage = 1;
     }
     this[prop] = value;
-    this.search();
+    await this.search();
+    await this.updateComplete;
+    if ( !this.formIsInViewport() ) {
+      this.scrollToForm();
+    }
   }
 
   /**
