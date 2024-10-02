@@ -41,7 +41,7 @@ class UcdlibDatalabJobsBoard {
       'active' => ['slug' => 'active', 'label' => 'Active'],
       'expired' => ['slug' => 'expired', 'label' => 'Expired']
     ];
-    $this->metaKeyPrefix = 'forminator_addon_dl-jb_';
+    $this->metaKeyPrefix = 'forminator_addon_dljb_';
     $this->postedDateMetaKey = 'posted-date';
     $this->jobStatusMetaKey ='job-status';
     $this->jobsPerPage = 10;

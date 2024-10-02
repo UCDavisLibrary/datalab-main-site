@@ -15,7 +15,7 @@
   "dependencies": {
     "@ucd-lib/brand-theme": "file:../../../../../repositories/ucdlib-theme-wp/src/public/",
     "@ucd-lib/cork-app-utils": "^5.1.0",
-    "@ucd-lib/theme-elements": "^2.0.1",
+    "@ucd-lib/theme-elements": "^3.0.5",
     "@ucd-lib/theme-sass": "^6.0.1",
     "breakpoint-sass": "^3.0.0",
     "lit": "^2.8.0",
