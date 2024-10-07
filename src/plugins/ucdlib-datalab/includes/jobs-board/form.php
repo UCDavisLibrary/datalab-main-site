@@ -38,7 +38,7 @@ class UcdlibDatalabJobsBoardForm {
   public function registerAddon(){
     require_once dirname( __FILE__ ) . '/form-addon.php';
     if ( class_exists( 'Forminator_Integration_Loader' ) ) {
-      Forminator_Integration_Loader::get_instance()->register( 'UcdlibDatalabJobsBoardAddon' );
+      Forminator_Integration_Loader::get_instance()->register( 'Forminator_Integration_Dljb' );
     }
   }
 

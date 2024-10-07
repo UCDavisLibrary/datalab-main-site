@@ -63,6 +63,7 @@ services:
     image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
     env_file:
       - .env
+    restart: always
     environment:
       GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-datalab-main-site-content}
       BACKUP_FILE_NAME: ${BACKUP_FILE_NAME:-db.sql.gz}

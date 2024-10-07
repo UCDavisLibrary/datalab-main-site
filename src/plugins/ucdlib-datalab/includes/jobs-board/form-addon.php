@@ -1,6 +1,6 @@
 <?php
 
-final class UcdlibDatalabJobsBoardAddon extends Forminator_Integration {
+final class Forminator_Integration_Dljb extends Forminator_Integration {
 
 	protected static $instance = null;
 
@@ -14,19 +14,11 @@ final class UcdlibDatalabJobsBoardAddon extends Forminator_Integration {
 
 	public function __construct() {
 		$this->_description = __( 'Integrations for the UC Davis Library Datalab Jobs Board. Activation handled automatically', 'forminator' );
-
-    $plugin = $GLOBALS['ucdlibDatalab'];
-    $image = $plugin->utils->logoUrl();
-    if ( !empty($image)) {
-      $this->_image = $image;
-      $this->_icon = $image;
-    }
-
 	}
 
   public function assets_path() : string {
     $plugin = $GLOBALS['ucdlibDatalab'];
-    return $plugin->assets->assetsUrl . '/forminator';
+    return $plugin->assets->assetsUrl . '/forminator/';
   }
 
 	/**
@@ -35,6 +27,10 @@ final class UcdlibDatalabJobsBoardAddon extends Forminator_Integration {
 	 * @return bool
 	 */
 	public function is_connected() {
+		return true;
+	}
+
+  public function is_authorized() {
 		return true;
 	}
 
