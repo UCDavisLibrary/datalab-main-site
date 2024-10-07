@@ -113,6 +113,32 @@ export default class UcdlibDlJobsBoard extends LitElement {
   }
 
   /**
+   * @description Check if the search form is in the viewport
+   * @returns {Boolean} - True if the form is in the viewport
+   */
+  formIsInViewport() {
+    const form = this.renderRoot.querySelector('form');
+    if ( !form ) return false;
+    const rect = form.getBoundingClientRect();
+    return (
+      rect.top >= 0 &&
+      rect.left >= 0 &&
+      rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
+  /**
+   * @description Scroll to the search form (aka the top of the element)
+   */
+  scrollToForm() {
+    const form = this.renderRoot.querySelector('form');
+    if ( form ) {
+      form.scrollIntoView({behavior: 'smooth'});
+    }
+  }
+
+  /**
    * @description Set the height of the loading container to the height of the loaded content
    */
   async setLoadingHeight(){
@@ -127,11 +153,15 @@ export default class UcdlibDlJobsBoard extends LitElement {
   /**
    * @description Handle pagination change
    */
-  _onPageChange(e){
+  async _onPageChange(e){
     if ( this.fetchStatus !== 'loaded' ) return;
     if ( e.detail.page == this.currentPage ) return;
     this.currentPage = e.detail.page;
-    this.getJobs();
+    await this.getJobs();
+    await this.updateComplete;
+    if ( !this.formIsInViewport() ) {
+      this.scrollToForm();
+    }
   }
 
   /**
