@@ -1,7 +1,6 @@
-version: '3'
 services:
   wordpress:
-    image: gcr.io/digital-ucdavis-edu/datalab-main-site:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site:v1.0.0
     env_file:
       - .env
     ports:
@@ -37,7 +36,7 @@ services:
       - wphb-cache:/usr/src/wordpress/wp-content/wphb-cache
 
   init:
-    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:v1.0.0
     env_file:
       - .env
     environment:
@@ -60,7 +59,7 @@ services:
     command: ./init/init.sh
 
   backup:
-    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:sandbox
+    image: gcr.io/digital-ucdavis-edu/datalab-main-site-utils:v1.0.0
     env_file:
       - .env
     restart: always

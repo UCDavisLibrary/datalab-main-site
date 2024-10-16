@@ -16,12 +16,12 @@ APP_SLUG=datalab-main-site
 
 # Main version number we are tagging the app with. Always update
 # this when you cut a new version of the app!
-APP_VERSION=v0.0.9.${BUILD_NUM}
+APP_VERSION=v1.0.0.${BUILD_NUM}
 
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-REPO_TAG=sandbox
+REPO_TAG=v1.0.0
 
 # Dependency tags/branches
 THEME_TAG='datalab'
