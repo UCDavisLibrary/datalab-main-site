@@ -109,14 +109,16 @@ class UcdlibOidc {
     $allowedRoles = array_intersect( $this->allowedClientRoles, $clientRoles );
     if ( count( $allowedRoles ) > 0 ) {
       $allowedRoles = array_values( $allowedRoles );
-      $user->set_role( $allowedRoles[0] );
+      $this->removeNativeRoles($user);
+      $user->add_role( $allowedRoles[0] );
       $roleSet = true;
     }
 
     // check realm roles
     if ( isset( $accessToken['realm_access']['roles'] ) ) {
       if ( in_array('admin-access',  $accessToken['realm_access']['roles']) ){
-        $user->set_role( 'administrator' );
+        $this->removeNativeRoles($user);
+        $user->add_role( 'administrator' );
         $roleSet = true;
       }
     }
@@ -125,8 +127,22 @@ class UcdlibOidc {
     if ( !$roleSet ) {
       $defaultRole = get_option( 'default_role' );
       if ( $defaultRole ) {
-        $user->set_role( $defaultRole );
+        $this->removeNativeRoles($user);
+        $user->add_role( $defaultRole );
       }
+    }
+  }
+
+  public function removeNativeRoles($user){
+    $nativeRoles = [
+      'administrator',
+      'editor',
+      'author',
+      'contributor',
+      'subscriber'
+    ];
+    foreach ($nativeRoles as $role) {
+      $user->remove_role( $role );
     }
   }
 

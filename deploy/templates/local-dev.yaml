@@ -45,7 +45,6 @@ services:
       - .env
     environment:
       RUN_INIT: "true"
-      INIT_DATA_ENV: ${INIT_DATA_ENV:-stage}
       SERVER_URL: http://localhost:${HOST_PORT:-3000}
       GC_PROJECT: ${GC_PROJECT:-{{GC_PROJECT}}}
       GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-{{GC_BUCKET_BACKUPS}}}
