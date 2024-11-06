@@ -64,8 +64,9 @@ export function styles() {
       cursor: pointer;
     }
     .no-jobs {
-      display: flex;
-      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #022851;
     }
     select {
       background-color: #B0D0ED;
@@ -134,9 +135,7 @@ function renderLoaded(){
         ${this.jobs.map(job => renderJobListing.call(this, job))}
       </div>
       <div ?hidden=${this.jobs.length} class='no-jobs'>
-        <section class='brand-textbox category-brand__background'>
-          No jobs found!
-        </section>
+        ${this.filterApplied ? 'No jobs match your search criteria' : 'No position openings at this time'}
       </div>
     </div>
     ${renderFooter.call(this)}

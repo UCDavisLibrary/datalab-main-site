@@ -22,7 +22,8 @@ export default class UcdlibDlJobsBoard extends LitElement {
       educationLevels: { state: true },
       totalPages: { state: true },
       fetchStatus: { state: true },
-      expandedJobs: { state: true }
+      expandedJobs: { state: true },
+      filterApplied: { state: true }
     }
   }
 
@@ -55,6 +56,13 @@ export default class UcdlibDlJobsBoard extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     await this.getJobs();
+  }
+
+  willUpdate(props){
+    const searchProps = ['searchText', 'filterSector', 'filterEducation'];
+    if ( searchProps.some(p => props.has(p)) ) {
+      this.filterApplied = searchProps.some(p => this[p]);
+    }
   }
 
   /**
