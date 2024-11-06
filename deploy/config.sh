@@ -21,7 +21,7 @@ APP_VERSION=v1.0.1.${BUILD_NUM}
 # Repository tags/branchs
 # Tags should always be used for production deployments
 # Branches can be used for development deployments
-REPO_TAG=stage
+REPO_TAG=v1.0.1
 
 # Dependency tags/branches
 THEME_TAG='datalab'
