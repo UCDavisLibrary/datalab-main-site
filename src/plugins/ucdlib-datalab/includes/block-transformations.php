@@ -36,9 +36,13 @@ class UcdlibDatalabBlockTransformations {
    */
   public static function getHackathonsElementProps($attrs=array()){
     $model = UcdlibDatalabHackathonsModel::class;
+    $yearFilters = $model::getAllStartYears();
+    $yearFilters = array_filter($yearFilters, function($year){
+      return $year <= date('Y');
+    });
     $props = [
       'typeFilters' => array_values($model::getAllTypes(true)),
-      'yearFilters' => array_values($model::getAllStartYears()),
+      'yearFilters' => array_values($yearFilters),
       'restNamespace' => 'ucdlib-datalab/challenge',
     ];
 
