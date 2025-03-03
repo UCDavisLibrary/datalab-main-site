@@ -13,7 +13,7 @@ ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.1.zip"
 ARG UCDLIB_THEME_WP_NODE_IMAGE
 
 # Download plugins from Google Cloud Storage
-FROM google/cloud-sdk:alpine as gcloud
+FROM google/cloud-sdk:alpine AS gcloud
 RUN mkdir -p /cache
 WORKDIR /cache
 ARG GC_BUCKET_PLUGINS="wordpress-general/plugins"
@@ -27,6 +27,7 @@ ARG SMUSH_PRO_ZIP_FILE
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE
 ARG BROKEN_LINK_CHECKER_ZIP_FILE
 
+RUN echo "$GOOGLE_KEY_FILE_CONTENT"
 RUN echo $GOOGLE_KEY_FILE_CONTENT | gcloud auth activate-service-account --key-file=-
 RUN gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_GENERIC_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/smtp-mailer/${SMTP_MAILER_ZIP_FILE} . \
