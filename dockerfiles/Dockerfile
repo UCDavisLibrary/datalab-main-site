@@ -10,6 +10,7 @@ ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.9.4.zip"
 ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.16.8.zip"
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-4.11.26.zip"
 ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.1.zip"
+ARG UCDLIB_THEME_WP_NODE_IMAGE
 
 # Download plugins from Google Cloud Storage
 FROM google/cloud-sdk:alpine as gcloud
@@ -38,6 +39,7 @@ RUN gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/broken-link-checker/${BROKEN_LINK_CHECKER_ZIP_FILE} .
 
 # Main build
+FROM ${UCDLIB_THEME_WP_NODE_IMAGE} AS ucdlib-theme-wp
 FROM wordpress:${WP_CORE_VERSION} as wordpress
 
 # WP Filesystem paths
@@ -165,6 +167,9 @@ WORKDIR $WP_SRC_ROOT
 # override docker entry point, so we can ensure apache can write to our volumes
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+RUN mkdir /cork-build-info
+COPY --from=ucdlib-theme-wp /cork-build-info/ucdlib-theme-wp.json /cork-build-info/ucdlib-theme-wp.json
 
 # start apache
 CMD ["apache2-foreground"]
