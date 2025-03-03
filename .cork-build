@@ -22,8 +22,10 @@
       "options" : {
         "build-arg" : [
           "NODE_VERSION=20",
-          "UCDLIB_THEME_WP_NODE_IMAGE=${datalab-main-site.node-ucdlib-theme-wp}",
-          "GOOGLE_KEY_FILE_CONTENT=${secret.datalab-main-site-reader}"
+          "UCDLIB_THEME_WP_NODE_IMAGE=${datalab-main-site.node-ucdlib-theme-wp}"
+        ],
+        "secret" : [
+          "id=google_key,env=DATALAB_MAIN_SITE_READER"
         ]
       }
     },

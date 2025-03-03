@@ -28,7 +28,7 @@ ARG SMUSH_PRO_ZIP_FILE
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE
 ARG BROKEN_LINK_CHECKER_ZIP_FILE
 
-RUN echo $GOOGLE_KEY_FILE_CONTENT | gcloud auth activate-service-account --key-file=-
+RUN --mount=type=secret,id=google_key gcloud auth activate-service-account --key-file=/run/secrets/google_key
 RUN gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_GENERIC_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/smtp-mailer/${SMTP_MAILER_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/redirection/${REDIRECTION_ZIP_FILE} . \
