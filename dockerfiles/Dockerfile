@@ -57,12 +57,6 @@ ENV WP_UPLOADS_DIR=${WP_UPLOADS_DIR}
 
 WORKDIR $WP_SRC_ROOT
 
-# Install Composer Package Manager (theme needs Timber and Twig)
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-ENV COMPOSER_ALLOW_SUPERUSER=1;
-COPY composer.json .
-RUN composer install
-
 # node setup
 ARG NODE_VERSION
 RUN apt-get update \
@@ -70,6 +64,12 @@ RUN apt-get update \
 && mkdir -p /etc/apt/keyrings \
 && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
 && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+
+# Install Composer Package Manager (theme needs Timber and Twig)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+ENV COMPOSER_ALLOW_SUPERUSER=1;
+COPY composer.json .
+RUN composer install
 
 # Install debian packages
 RUN apt-get update && apt-get install -y unzip git vim nodejs
