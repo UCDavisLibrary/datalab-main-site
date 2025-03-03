@@ -67,9 +67,6 @@ RUN apt-get update \
 
 # Install Composer Package Manager (theme needs Timber and Twig)
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-ENV COMPOSER_ALLOW_SUPERUSER=1;
-COPY composer.json .
-RUN composer install
 
 # Install debian packages
 RUN apt-get update && apt-get install -y unzip git vim nodejs
@@ -97,6 +94,11 @@ RUN set -eux; \
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
 && chmod +x wp-cli.phar \
 && mv wp-cli.phar /usr/local/bin/wp
+
+# Install composer dependencies for theme and plugins
+ENV COMPOSER_ALLOW_SUPERUSER=1;
+COPY composer.json .
+RUN composer install
 
 # copy theme
 WORKDIR $WP_THEME_DIR
