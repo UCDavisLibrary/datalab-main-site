@@ -30,19 +30,6 @@ MYSQL_TAG=5.7
 ADMINER_TAG=4
 NODE_VERSION=20
 
-# Plugin versions from Google Cloud Storage
-OPENID_CONNECT_GENERIC_VERSION='3.10.0'
-REDIRECTION_VERSION='5.5.0'
-SMTP_MAILER_VERSION='1.1.15'
-DEFENDER_PRO_VERSION='4.10'
-FORMINATOR_PRO_VERSION='1.35.1'
-HUMMINGBIRD_PRO_VERSION='3.9.4'
-SMUSH_PRO_VERSION='3.16.8'
-WPMU_DEV_DASHBOARD_VERSION='4.11.26'
-BROKEN_LINK_CHECKER_VERSION='2.4.1'
-
-# Plugin versions from github
-FORMS_STYLES_VERSION='v1.1.0'
 
 # Auth Defaults ( can also be overriden in .env file )
 # OIDC_PROVIDER_URL='https://sandbox.auth.library.ucdavis.edu/realms/internal'
@@ -71,10 +58,6 @@ GITHUB_ORG_URL=https://github.com/UCDavisLibrary
 # theme
 THEME_REPO_NAME=ucdlib-theme-wp
 THEME_REPO_URL=$GITHUB_ORG_URL/$THEME_REPO_NAME
-
-# form styles plugin
-FORMS_STYLES_REPO_NAME=forminator-theme-styles
-FORMS_STYLES_REPO_URL=$GITHUB_ORG_URL/$FORMS_STYLES_REPO_NAME
 
 # local development repository dependencies
 DEV_REPOS=(
@@ -132,8 +115,6 @@ SRC_DIR=$ROOT_DIR/src
 REPOSITORY_DIR=$ROOT_DIR/repositories
 
 # WP Directories (in container)
-WP_SRC_ROOT=/usr/src/wordpress
-WP_LOG_ROOT=/var/log/wordpress
 WP_CONTENT_DIR=$WP_SRC_ROOT/wp-content
 WP_THEME_DIR=$WP_CONTENT_DIR/themes
 WP_UCD_THEME_DIR=$WP_THEME_DIR/$THEME_REPO_NAME
@@ -157,7 +138,6 @@ JS_BUNDLES=(
 GC_PROJECT=digital-ucdavis-edu
 GC_READER_KEY_SECRET=$APP_SLUG-reader
 GC_WRITER_KEY_SECRET=$APP_SLUG-writer
-GC_BUCKET_PLUGINS=wordpress-general/plugins
 GC_BUCKET_BACKUPS=$APP_SLUG-content
 BACKUP_FILE_NAME="db.sql.gz"
 UPLOADS_FILE_NAME="uploads.tar.gz"

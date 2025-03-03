@@ -1,0 +1,40 @@
+{
+  "registry" : "us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress",
+
+  "repositories" : {
+    "ucdlib-theme-wp" : "https://github.com/UCDavisLibrary/ucdlib-theme-wp"
+  },
+
+  "images" : {
+    "node-ucdlib-theme-wp" : {
+      "contextPath" : "dockerfiles",
+      "dockerfile" : "dockerfiles/Dockerfile.ucdlib-theme-wp",
+      "options" : {
+        "build-arg" : [
+          "NODE_VERSION=20",
+          "UCDLIB_THEME_WP_SRC_IMAGE=${ucdlib-theme-wp.ucdlib-theme-wp}"
+        ]
+      }
+    },
+    "datalab-main-site" : {
+      "contextPath" : ".",
+      "dockerfile" : "dockerfiles/Dockerfile",
+      "options" : {
+        "build-arg" : [
+          "NODE_VERSION=20",
+          "UCDLIB_THEME_WP_NODE_IMAGE=${main-wp-website.node-ucdlib-theme-wp}",
+          "GOOGLE_KEY_FILE_CONTENT=${secret.datalab-main-site-reader}"
+        ]
+      }
+    },
+    "datalab-main-site-utils" : {
+      "contextPath" : "./utils",
+      "options" : {
+        "build-arg" : [
+          "NODE_VERSION=20",
+          "BASE_IMAGE=${datalab-main-site.datalab-main-site}"
+        ]
+      }
+    }
+  }
+}

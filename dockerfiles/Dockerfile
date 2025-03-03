@@ -1,31 +1,21 @@
 # Multistage build args
-ARG WP_CORE_VERSION
-ARG REDIRECTION_VERSION
-ARG REDIRECTION_ZIP_FILE="redirection-${REDIRECTION_VERSION}.zip"
-ARG SMTP_MAILER_VERSION
-ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-${SMTP_MAILER_VERSION}.zip"
-ARG OPENID_CONNECT_GENERIC_VERSION
-ARG OPENID_CONNECT_GENERIC_DIR="openid-connect-generic-${OPENID_CONNECT_GENERIC_VERSION}"
+ARG WP_CORE_VERSION="6.6.2"
+ARG REDIRECTION_ZIP_FILE="redirection-5.5.0.zip"
+ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-1.1.15.zip"
+ARG OPENID_CONNECT_GENERIC_DIR="openid-connect-generic-3.10.0"
 ARG OPENID_CONNECT_GENERIC_ZIP_FILE="${OPENID_CONNECT_GENERIC_DIR}.zip"
-ARG DEFENDER_PRO_VERSION
-ARG DEFENDER_PRO_ZIP_FILE="defender-pro-${DEFENDER_PRO_VERSION}.zip"
-ARG FORMINATOR_PRO_VERSION
-ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-${FORMINATOR_PRO_VERSION}.zip"
-ARG HUMMINGBIRD_PRO_VERSION
-ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-${HUMMINGBIRD_PRO_VERSION}.zip"
-ARG SMUSH_PRO_VERSION
-ARG SMUSH_PRO_ZIP_FILE="smush-pro-${SMUSH_PRO_VERSION}.zip"
-ARG WPMU_DEV_DASHBOARD_VERSION
-ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-${WPMU_DEV_DASHBOARD_VERSION}.zip"
-ARG BROKEN_LINK_CHECKER_VERSION
-ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-${BROKEN_LINK_CHECKER_VERSION}.zip"
-
+ARG DEFENDER_PRO_ZIP_FILE="defender-pro-4.10.zip"
+ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-1.35.1.zip"
+ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.9.4.zip"
+ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.16.8.zip"
+ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-4.11.26.zip"
+ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.1.zip"
 
 # Download plugins from Google Cloud Storage
 FROM google/cloud-sdk:alpine as gcloud
 RUN mkdir -p /cache
 WORKDIR /cache
-ARG GC_BUCKET_PLUGINS
+ARG GC_BUCKET_PLUGINS="wordpress-general/plugins"
 ARG REDIRECTION_ZIP_FILE
 ARG OPENID_CONNECT_GENERIC_ZIP_FILE
 ARG SMTP_MAILER_ZIP_FILE
@@ -36,9 +26,8 @@ ARG SMUSH_PRO_ZIP_FILE
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE
 ARG BROKEN_LINK_CHECKER_ZIP_FILE
 
-COPY deploy/gc-reader-key.json gc-reader-key.json
-RUN gcloud auth activate-service-account --key-file=./gc-reader-key.json \
-&& gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_GENERIC_ZIP_FILE} . \
+RUN echo $GOOGLE_KEY_FILE_CONTENT | gcloud auth activate-service-account --key-file=-
+RUN gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_GENERIC_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/smtp-mailer/${SMTP_MAILER_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/redirection/${REDIRECTION_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/defender-pro/${DEFENDER_PRO_ZIP_FILE} . \
@@ -46,28 +35,23 @@ RUN gcloud auth activate-service-account --key-file=./gc-reader-key.json \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/hummingbird-pro/${HUMMINGBIRD_PRO_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/smush-pro/${SMUSH_PRO_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/wpmudev-updates/${WPMU_DEV_DASHBOARD_ZIP_FILE} . \
-&& gsutil cp gs://${GC_BUCKET_PLUGINS}/broken-link-checker/${BROKEN_LINK_CHECKER_ZIP_FILE} . \
-&& rm gc-reader-key.json
+&& gsutil cp gs://${GC_BUCKET_PLUGINS}/broken-link-checker/${BROKEN_LINK_CHECKER_ZIP_FILE} .
 
 # Main build
 FROM wordpress:${WP_CORE_VERSION} as wordpress
 
-# ARGS
-ARG APP_VERSION
-ENV APP_VERSION ${APP_VERSION}
-ARG BUILD_NUM
-ENV BUILD_NUM ${BUILD_NUM}
-ARG BUILD_TIME
-ENV BUILD_TIME ${BUILD_TIME}
-ARG WP_SRC_ROOT
-ENV WP_SRC_ROOT=${WP_SRC_ROOT}
+# WP Filesystem paths
 ARG WP_LOG_ROOT
+ARG WP_SRC_ROOT=/usr/src/wordpress
+ARG WP_CONTENT_DIR=$WP_SRC_ROOT/wp-content
+ARG WP_THEME_DIR=$WP_CONTENT_DIR/themes
+ARG WP_PLUGIN_DIR=$WP_CONTENT_DIR/plugins
+ARG WP_UPLOADS_DIR=$WP_CONTENT_DIR/uploads
+
+# WP Filesystem env vars
 ENV WP_LOG_ROOT=${WP_LOG_ROOT}
-ARG WP_UPLOADS_DIR
+ENV WP_SRC_ROOT=${WP_SRC_ROOT}
 ENV WP_UPLOADS_DIR=${WP_UPLOADS_DIR}
-ARG WP_THEME_DIR
-ARG WP_PLUGIN_DIR
-ARG GITHUB_ORG_URL
 
 WORKDIR $WP_SRC_ROOT
 
@@ -107,20 +91,17 @@ RUN set -eux; \
 	find /etc/apache2 -name '*.conf' -type f -exec sed -ri -e "s!/var/www/html!$PWD!g" -e "s!Directory /var/www/!Directory $PWD!g" '{}' +; \
 	cp -s wp-config-docker.php wp-config.php
 
-# WP CLI - a nice thing to have
+# WP CLI
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
 && chmod +x wp-cli.phar \
 && mv wp-cli.phar /usr/local/bin/wp
 
-# get our prebuilt theme
-ARG THEME_TAG
-ARG THEME_REPO_NAME
+# copy theme
 WORKDIR $WP_THEME_DIR
 RUN rm -rf */
-RUN git clone -b ${THEME_TAG} ${GITHUB_ORG_URL}/${THEME_REPO_NAME} \
-&& cd ${THEME_REPO_NAME}/src/public \
-&& npm install --only=prod && npm link \
-&& cd $WP_THEME_DIR/${THEME_REPO_NAME}/src/editor && npm install --only=prod && npm link
+COPY --from=ucdlib-theme-wp /plugin/ucdlib-theme-wp $WP_THEME_DIR/ucdlib-theme-wp
+RUN cd $WP_THEME_DIR/ucdlib-theme-wp/src/editor && npm link \
+&& cd $WP_THEME_DIR/ucdlib-theme-wp/src/public && npm link
 
 # remove default plugins and insert the plugins we downloaded from GCS
 ARG OPENID_CONNECT_GENERIC_DIR
@@ -135,7 +116,6 @@ ARG WPMU_DEV_DASHBOARD_ZIP_FILE
 ARG BROKEN_LINK_CHECKER_ZIP_FILE
 WORKDIR $WP_PLUGIN_DIR
 RUN rm -rf */ && rm -f hello.php
-COPY src/plugins .
 COPY --from=gcloud /cache/${OPENID_CONNECT_GENERIC_ZIP_FILE} .
 COPY --from=gcloud /cache/${REDIRECTION_ZIP_FILE} .
 COPY --from=gcloud /cache/${SMTP_MAILER_ZIP_FILE} .
@@ -157,9 +137,9 @@ RUN unzip ${OPENID_CONNECT_GENERIC_ZIP_FILE} && rm ${OPENID_CONNECT_GENERIC_ZIP_
 && mv $OPENID_CONNECT_GENERIC_DIR openid-connect-generic
 
 # Get plugins from github
-ARG FORMS_STYLES_REPO_NAME
-ARG FORMS_STYLES_VERSION
-RUN git clone -b ${FORMS_STYLES_VERSION} ${GITHUB_ORG_URL}/${FORMS_STYLES_REPO_NAME}
+RUN git -c advice.detachedHead=false \
+	clone https://github.com/UCDavisLibrary/forminator-theme-styles.git \
+	--branch v1.1.0 --single-branch --depth 1
 
 # Copy our custom plugins
 COPY src/plugins/ucdlib-oidc ucdlib-oidc

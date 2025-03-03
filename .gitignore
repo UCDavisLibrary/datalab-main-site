@@ -8,3 +8,4 @@ repositories
 package-lock.json
 src/plugins/ucdlib-datalab/assets/assets/js
 src/plugins/ucdlib-datalab/assets/assets/css
+secrets
