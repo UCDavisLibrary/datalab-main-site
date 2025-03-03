@@ -16,6 +16,7 @@ ARG UCDLIB_THEME_WP_NODE_IMAGE
 FROM google/cloud-sdk:alpine AS gcloud
 RUN mkdir -p /cache
 WORKDIR /cache
+ARG GOOGLE_KEY_FILE_CONTENT
 ARG GC_BUCKET_PLUGINS="wordpress-general/plugins"
 ARG REDIRECTION_ZIP_FILE
 ARG OPENID_CONNECT_GENERIC_ZIP_FILE
@@ -27,7 +28,7 @@ ARG SMUSH_PRO_ZIP_FILE
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE
 ARG BROKEN_LINK_CHECKER_ZIP_FILE
 
-RUN echo $GOOGLE_KEY_FILE_CONTENT | gcloud auth activate-service-account --key-file=- --account=datalab-main-site-reader@digital-ucdavis-edu.iam.gserviceaccount.com
+RUN echo $GOOGLE_KEY_FILE_CONTENT | gcloud auth activate-service-account --key-file=-
 RUN gsutil cp gs://${GC_BUCKET_PLUGINS}/openid-connect-generic/${OPENID_CONNECT_GENERIC_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/smtp-mailer/${SMTP_MAILER_ZIP_FILE} . \
 && gsutil cp gs://${GC_BUCKET_PLUGINS}/redirection/${REDIRECTION_ZIP_FILE} . \
