@@ -7,7 +7,7 @@ const config = {
   scssEntry: './scss/style.scss',
   clientModules: [
     './node_modules',
-    '../../../../../../repositories/ucdlib-theme-wp/src/public/node_modules',
+    '../../../../../../../ucdlib-theme-wp/src/public/node_modules',
     '../../../../../themes/ucdlib-theme-wp/src/public/node_modules'
   ],
 

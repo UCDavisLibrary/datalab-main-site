@@ -6,14 +6,10 @@
 
 set -e
 CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $CMDS_DIR/..
-
+cd $CMDS_DIR
 source ./config.sh
 
-touch ./gc-writer-key.json
-touch ./gc-reader-key.json
-
 ./cmds/get-reader-key.sh
-./cmds/get-writer-key.sh
-./cmds/link-dev-repos.sh
+./cmds/get-env-file.sh local-dev
 ./cmds/install-private-packages.sh
+./cmds/generate-dev-bundles.sh

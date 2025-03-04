@@ -1,32 +1,52 @@
 #! /bin/bash
 
 ###
-# download the env file from the secret manager
-# first arg is either 'prod' or 'dev'
-# You will want to review the env file before using it, since it has values for both dev and prod
+# Downloads env from google cloud secret manager and places in specified deployment directory
+# Usage: ./cmds/get-env.sh [-f] <deployment-dir>
+# -f: force overwrite of existing .env file
+# deployment-dir: required. e.g. local-dev gets placed in compose/datalab-main-site-local-dev/.env
 ###
 
 set -e
 CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-cd $CMDS_DIR/..
-source config.sh
+cd $CMDS_DIR
 
-ENV_TYPE="${1:-prod}"
-if [ "$ENV_TYPE" != "prod" ]; then
-  ENV_TYPE="dev"
-  ENV_FILE="./${LOCAL_DEV_DIRECTORY}/.env"
-else
-  ENV_TYPE="prod"
-  ENV_FILE="./.env"
-fi
+FORCE_OVERWRITE=false
 
-if [ -e "$ENV_FILE" ]; then
-  echo "Error: $ENV_FILE already exists. Please remove it and try again."
+while getopts ":f" opt; do
+  case ${opt} in
+    f )
+      FORCE_OVERWRITE=true
+      ;;
+    \? )
+      echo "Invalid option: -$OPTARG" 1>&2
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+
+DEPLOYMENT_DIR=$1
+
+if [ -z "$DEPLOYMENT_DIR" ]; then
+  echo "Deployment directory is required."
   exit 1
 fi
 
-echo "Downloading env file and placing it in ${ENV_FILE} of deployment directory"
+DEPLOYMENT_DIR="../compose/datalab-main-site-$DEPLOYMENT_DIR"
 
-gcloud secrets versions access latest --secret="${APP_SLUG}-env" > $ENV_FILE
+if [ ! -d "$DEPLOYMENT_DIR" ]; then
+  echo "Deployment directory does not exist: $DEPLOYMENT_DIR"
+  exit 1
+fi
 
-echo "Remember to review the env file before using it, since it has values for both dev and prod"
+ENV_FILE="$DEPLOYMENT_DIR/.env"
+
+if [ -f "$ENV_FILE" ] && [ "$FORCE_OVERWRITE" = false ]; then
+  echo ".env file already exists. Use -f to force overwrite."
+  exit 1
+fi
+
+gcloud --project=digital-ucdavis-edu secrets versions access latest --secret=datalab-main-site-env > "$ENV_FILE"
+
+echo ".env file has been downloaded to $DEPLOYMENT_DIR"

@@ -3,7 +3,6 @@ node_modules
 .DS_Store
 gc-writer-key.json
 gc-reader-key.json
-datalab-main-site-local-dev
 repositories
 package-lock.json
 src/plugins/ucdlib-datalab/assets/assets/js
