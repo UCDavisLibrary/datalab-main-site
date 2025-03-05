@@ -1,0 +1,115 @@
+x-variables:
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site:stage
+  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site-utils:stage
+
+services:
+  wordpress:
+    image: *main-image
+    env_file:
+      - .env
+    ports:
+      - ${HOST_PORT:-3000}:80
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    environment:
+      WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
+      WORDPRESS_DB_DATABASE: ${DB_DATABASE}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_SITEURL', '${SERVER_URL}' );
+        define('WP_HOME', '${SERVER_URL}' );
+        define('FORCE_SSL_ADMIN', true);
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-datalab-main-site}
+      OIDC_ENDPOINT_LOGIN_URL: ${OIDC_ENDPOINT_LOGIN_URL:-https://auth.library.ucdavis.edu/realms/internal/protocol/openid-connect/auth}
+      OIDC_ENDPOINT_USERINFO_URL: ${OIDC_ENDPOINT_USERINFO_URL:-}
+      OIDC_ENDPOINT_TOKEN_URL: ${OIDC_ENDPOINT_TOKEN_URL:-https://auth.library.ucdavis.edu/realms/internal/protocol/openid-connect/token}
+      OIDC_ENDPOINT_LOGOUT_URL: ${OIDC_ENDPOINT_LOGOUT_URL:-https://auth.library.ucdavis.edu/realms/internal/protocol/openid-connect/logout}
+      OIDC_CLIENT_SCOPE: ${OIDC_CLIENT_SCOPE:-openid profile email roles}
+      OIDC_LOGIN_TYPE: ${OIDC_LOGIN_TYPE:-auto}
+      OIDC_CREATE_IF_DOES_NOT_EXIST: ${OIDC_CREATE_IF_DOES_NOT_EXIST:-true}
+      OIDC_LINK_EXISTING_USERS: ${OIDC_LINK_EXISTING_USERS:-true}
+      OIDC_REDIRECT_USER_BACK: ${OIDC_REDIRECT_USER_BACK:-true}
+      OIDC_ENFORCE_PRIVACY: ${OIDC_ENFORCE_PRIVACY:-false}
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - uploads-data:/usr/src/wordpress/wp-content/uploads
+      - wp-logs-data:/var/log/wordpress
+      - wphb-logs:/usr/src/wordpress/wp-content/wphb-logs
+      - wphb-cache:/usr/src/wordpress/wp-content/wphb-cache
+
+  init:
+    image: *utils-image
+    env_file:
+      - .env
+    environment:
+      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-datalab-main-site-content}
+      GC_PROJECT: ${GC_PROJECT:-digital-ucdavis-edu}
+      BACKUP_FILE_NAME: ${BACKUP_FILE_NAME:-db.sql.gz}
+      UPLOADS_FILE_NAME: ${UPLOADS_FILE_NAME:-uploads.tar.gz}
+      WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
+      WORDPRESS_DB_DATABASE: ${DB_DATABASE}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_USER: ${DB_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - db
+      - wordpress
+    volumes:
+      - uploads-data:/uploads
+      - wphb-cache:/wphb-cache
+      - ../../secrets/gc-reader-key.json:/etc/service-account.json
+    command: ./init/init.sh
+
+  backup:
+    image: *utils-image
+    env_file:
+      - .env
+    restart: always
+    environment:
+      BACKUP_DATA_ENV: ${BACKUP_DATA_ENV:-stage}
+      GC_BUCKET_BACKUPS: ${GC_BUCKET_BACKUPS:-datalab-main-site-content}
+      BACKUP_FILE_NAME: ${BACKUP_FILE_NAME:-db.sql.gz}
+      UPLOADS_FILE_NAME: ${UPLOADS_FILE_NAME:-uploads.tar.gz}
+      WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
+      WORDPRESS_DB_DATABASE: ${DB_DATABASE}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_USER: ${DB_USER}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      - db
+      - wordpress
+    volumes:
+      - uploads-data:/uploads
+      - wphb-cache:/wphb-cache
+      - ../../secrets/gc-writer-key.json:/etc/service-account.json
+    command: "./backup/entrypoint.sh"
+
+  db:
+    image: mysql:5.7
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+    ulimits:
+      nofile:
+        soft: 262114
+        hard: 262114
+
+volumes:
+  db-data:
+  uploads-data:
+  wp-logs-data:
+  wphb-cache:
+  wphb-logs:

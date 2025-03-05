@@ -6,6 +6,7 @@ require_once( __DIR__ . '/config.php' );
 require_once( __DIR__ . '/google.php' );
 require_once( __DIR__ . '/hackathons/main.php' );
 require_once( __DIR__ . '/hummingbird.php' );
+require_once( __DIR__ . '/log.php' );
 require_once( __DIR__ . '/jobs-board/main.php' );
 require_once( __DIR__ . '/projects/main.php' );
 require_once( __DIR__ . '/robots.php' );
@@ -21,6 +22,7 @@ class UcdlibDatalab {
   public $google;
   public $hackathons;
   public $hummingbird;
+  public $log;
   public $jobsBoard;
   public $projects;
   public $robots;
@@ -37,6 +39,7 @@ class UcdlibDatalab {
     $this->google = new UcdlibDatalabGoogle( $this );
     $this->hackathons = new UcdlibDatalabHackathons( $this );
     $this->hummingbird = new UcdlibDatalabHummingbird( $this );
+    $this->log = new UcdlibDatalabLog( $this );
     $this->jobsBoard = new UcdlibDatalabJobsBoard( $this );
     $this->projects = new UcdlibDatalabProjects( $this );
     $this->robots = new UcdlibDatalabRobots( $this );

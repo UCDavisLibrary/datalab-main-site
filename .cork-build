@@ -6,7 +6,7 @@
   },
 
   "images" : {
-    "node-ucdlib-theme-wp" : {
+    "datalab-main-site-ucdlib-theme-wp" : {
       "contextPath" : "dockerfiles",
       "dockerfile" : "dockerfiles/Dockerfile.ucdlib-theme-wp",
       "options" : {
@@ -22,7 +22,7 @@
       "options" : {
         "build-arg" : [
           "NODE_VERSION=20",
-          "UCDLIB_THEME_WP_NODE_IMAGE=${datalab-main-site.node-ucdlib-theme-wp}"
+          "UCDLIB_THEME_WP_NODE_IMAGE=${datalab-main-site.datalab-main-site-ucdlib-theme-wp}"
         ],
         "secret" : [
           "id=google_key,env=DATALAB_MAIN_SITE_READER"

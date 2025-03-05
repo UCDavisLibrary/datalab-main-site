@@ -220,18 +220,11 @@ class UcdlibDatalabAssets {
     if ( !empty($this->bundleVersion) ) {
       return $this->bundleVersion;
     }
-    $now = (new DateTime())->getTimestamp();
-    $appVersion = $this->plugin->config->getAppVersion();
-
-    if ( !empty($appVersion) ) {
-      if ( substr_compare($appVersion, '-1', -strlen('-1')) === 0 ) {
-        $bundleVersion = $now;
-      } else {
-        $bundleVersion = $appVersion;
-      }
-    } else {
-      $bundleVersion = $now;
+    $bundleVersion = (new DateTime())->getTimestamp();
+    if ( !$this->plugin->config->isDevEnv() && $this->plugin->config->getBuildTime() ){
+      $bundleVersion = $this->plugin->config->getBuildTime();
     }
+
     $this->bundleVersion = $bundleVersion;
     return $bundleVersion;
   }

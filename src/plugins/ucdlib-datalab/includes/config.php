@@ -7,6 +7,7 @@ class UcdlibDatalabConfig {
 
   public function __construct( $plugin ){
     $this->plugin = $plugin;
+    $this->setBuildEnvVars();
   }
 
   private $envVariables;
@@ -35,6 +36,50 @@ class UcdlibDatalabConfig {
 
   public function allowSiteIndexing(){
     return $this->getEnv('ALLOW_SITE_INDEXING') == 'true';
+  }
+
+  // sets the build environment variables from cork-build-info
+  public function setBuildEnvVars(){
+    $mainBuildInfo = $this->readBuildInfo('datalab-main-site.json');
+    if ( $mainBuildInfo ) {
+      $appVersion = $this->getBuildVersion($mainBuildInfo);
+      if ( $appVersion ) {
+        putenv('APP_VERSION=' . $appVersion);
+      }
+      if ( array_key_exists('date', $mainBuildInfo) ) {
+        putenv('BUILD_TIME=' . $mainBuildInfo['date']);
+      }
+    }
+
+    $themeBuildInfo = $this->readBuildInfo('ucdlib-theme-wp.json');
+    if ( $themeBuildInfo ) {
+      $websiteTag = $this->getBuildVersion($themeBuildInfo);
+      if ( $websiteTag ) {
+        putenv('WEBSITE_TAG=' . $websiteTag);
+      }
+    }
+  }
+
+  // reads build info from a cork-build-info file
+  public function readBuildInfo($filename) {
+    $filePath = '/cork-build-info/' . $filename;
+    if (!file_exists($filePath)) {
+      return null;
+    }
+    $jsonContent = file_get_contents($filePath);
+    return json_decode($jsonContent, true);
+  }
+
+  public function getBuildVersion($buildInfo){
+    if ( !empty($buildInfo['tag']) ) {
+      return $buildInfo['tag'];
+    } else if ( !empty($buildInfo['branch']) ) {
+      return $buildInfo['branch'];
+    } else if ( !empty($buildInfo['imageTag']) ) {
+      $imageTag = explode(':', $buildInfo['imageTag']);
+      return end($imageTag);
+    }
+    return null;
   }
 
   /**
