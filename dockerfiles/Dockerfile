@@ -104,9 +104,9 @@ RUN composer install
 # copy theme
 WORKDIR $WP_THEME_DIR
 RUN rm -rf */
-COPY --from=ucdlib-theme-wp /plugin/ucdlib-theme-wp ucdlib-theme-wp
-RUN cd ucdlib-theme-wp/src/editor && npm link \
-&& cd ucdlib-theme-wp/src/public && npm link
+COPY --from=ucdlib-theme-wp /plugin/ucdlib-theme-wp $WP_THEME_DIR/ucdlib-theme-wp
+RUN cd $WP_THEME_DIR/ucdlib-theme-wp/src/editor && npm link \
+&& cd $WP_THEME_DIR/ucdlib-theme-wp/src/public && npm link
 
 # remove default plugins and insert the plugins we downloaded from GCS
 ARG OPENID_CONNECT_GENERIC_DIR
@@ -161,8 +161,8 @@ RUN cd ucdlib-datalab/assets/public \
 && npm run dist \
 && rm -rf node_modules \
 && rm -rf ../public/node_modules \
-&& rm -rf ${WP_THEME_DIR}/ucdlib-theme-wp/src/public/node_modules \
-&& rm -rf ${WP_THEME_DIR}/ucdlib-theme-wp/src/editor/node_modules
+&& rm -rf $WP_THEME_DIR/ucdlib-theme-wp/src/public/node_modules \
+&& rm -rf $WP_THEME_DIR/ucdlib-theme-wp/src/editor/node_modules
 
 # Back to site root so wordpress can do the rest of its thing
 WORKDIR $WP_SRC_ROOT
