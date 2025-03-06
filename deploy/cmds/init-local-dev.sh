@@ -7,9 +7,8 @@
 set -e
 CMDS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $CMDS_DIR
-source ./config.sh
 
-./cmds/get-reader-key.sh
-./cmds/get-env-file.sh local-dev
-./cmds/install-private-packages.sh
-./cmds/generate-dev-bundles.sh
+./get-reader-key.sh
+./get-env-file.sh local-dev
+./install-private-packages.sh
+./generate-dev-bundles.sh
