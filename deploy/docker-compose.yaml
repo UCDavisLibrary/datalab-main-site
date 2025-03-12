@@ -7,6 +7,7 @@ services:
       - ${HOST_PORT:-3000}:80
     restart: always
     environment:
+      ALLOW_SITE_INDEXING: 'true'
       WORDPRESS_DB_HOST: ${DB_HOST:-db:3306}
       WORDPRESS_DB_DATABASE: ${DB_DATABASE}
       WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
