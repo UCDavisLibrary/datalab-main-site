@@ -44,7 +44,7 @@ FROM ${UCDLIB_THEME_WP_NODE_IMAGE} AS ucdlib-theme-wp
 FROM wordpress:${WP_CORE_VERSION} as wordpress
 
 # WP Filesystem paths
-ARG WP_LOG_ROOT
+ARG WP_LOG_ROOT=/var/log/wordpress
 ARG WP_SRC_ROOT=/usr/src/wordpress
 ARG WP_CONTENT_DIR=$WP_SRC_ROOT/wp-content
 ARG WP_THEME_DIR=$WP_CONTENT_DIR/themes
