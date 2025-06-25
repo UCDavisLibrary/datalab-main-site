@@ -1,5 +1,5 @@
 import { Fragment } from "@wordpress/element";
-import { PluginPostStatusInfo } from '@wordpress/edit-post';
+import { PluginPostStatusInfo } from '@wordpress/editor';
 import {
   DateTimePicker,
   Dropdown,
