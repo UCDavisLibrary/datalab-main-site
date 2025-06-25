@@ -84,6 +84,7 @@ class UcdlibDatalabAssets {
     add_action('admin_enqueue_scripts', [$this, 'enqueuePublicScriptsInAdmin']);
     add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorScripts'], 3);
     add_filter('ucd-theme/site/block-settings', [$this, 'modifyDefaultPostImgUrl'], 10, 1);
+    add_filter('ucd-theme/admin-variable/editor-script', [$this, 'updateEditorScriptVariable' ]);
   }
 
   /**
@@ -102,6 +103,15 @@ class UcdlibDatalabAssets {
     if ( strpos($hook, $this->plugin->config->slug) === false ) return;
     $this->enqueuePublicScripts(true);
     $this->enqueueFonts();
+  }
+
+  public function updateEditorScriptVariable(){
+    $url = $this->jsEditorUrlDist;
+    if ( $this->plugin->config->isDevEnv() ){
+      $url = $this->jsEditorUrlDev;
+    }
+    $url .= '?v=' . $this->bundleVersion();
+    return $url;
   }
 
   /**
