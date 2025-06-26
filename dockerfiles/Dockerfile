@@ -1,15 +1,15 @@
 # Multistage build args
-ARG WP_CORE_VERSION="6.6.2"
-ARG REDIRECTION_ZIP_FILE="redirection-5.5.0.zip"
-ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-1.1.15.zip"
+ARG WP_CORE_VERSION="6.8.1"
+ARG REDIRECTION_ZIP_FILE="redirection-5.5.2.zip"
+ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-1.1.20.zip"
 ARG OPENID_CONNECT_GENERIC_DIR="openid-connect-generic-3.10.0"
 ARG OPENID_CONNECT_GENERIC_ZIP_FILE="${OPENID_CONNECT_GENERIC_DIR}.zip"
-ARG DEFENDER_PRO_ZIP_FILE="defender-pro-4.10.zip"
-ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-1.35.1.zip"
-ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.9.4.zip"
-ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.16.8.zip"
-ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-4.11.26.zip"
-ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.1.zip"
+ARG DEFENDER_PRO_ZIP_FILE="defender-pro-5.2.zip"
+ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-1.44.zip"
+ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.14.1.zip"
+ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.19.1.zip"
+ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-4.11.29.zip"
+ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.6.zip"
 ARG UCDLIB_THEME_WP_NODE_IMAGE
 
 # Download plugins from Google Cloud Storage
@@ -44,7 +44,7 @@ FROM ${UCDLIB_THEME_WP_NODE_IMAGE} AS ucdlib-theme-wp
 FROM wordpress:${WP_CORE_VERSION} as wordpress
 
 # WP Filesystem paths
-ARG WP_LOG_ROOT
+ARG WP_LOG_ROOT=/var/log/wordpress
 ARG WP_SRC_ROOT=/usr/src/wordpress
 ARG WP_CONTENT_DIR=$WP_SRC_ROOT/wp-content
 ARG WP_THEME_DIR=$WP_CONTENT_DIR/themes

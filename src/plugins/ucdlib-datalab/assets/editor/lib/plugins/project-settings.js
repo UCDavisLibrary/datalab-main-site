@@ -1,4 +1,4 @@
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { Fragment, useEffect } from "@wordpress/element";
 import { useDispatch } from "@wordpress/data";
 import {
