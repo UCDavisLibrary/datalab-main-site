@@ -6,6 +6,8 @@ https://www.figma.com/file/chC7MLHfapKSRsTXFWNLRs/DataLab?type=design&node-id=37
 
 ## Deployment
 
+The deployment process follows the same general strategy as the [main library website](https://github.com/UCDavisLibrary/main-wp-website-deployment).
+
 ## Development
 
 To get the site up and running on your machine:
