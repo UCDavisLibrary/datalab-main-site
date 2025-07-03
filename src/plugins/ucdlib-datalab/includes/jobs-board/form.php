@@ -132,6 +132,19 @@ class UcdlibDatalabJobsBoardForm {
   }
 
   /**
+   * @description In order for forminator hooks to work,
+   * Integration must have a settings object saved on form meta
+   * https://github.com/UCDavisLibrary/datalab-main-site/issues/16
+   */
+  public function saveIntegrationSettings(){
+    $settings = $this->jobsBoard->getAdminSettings();
+    if ( empty($settings['selectedForm']) ) return false;
+    $formId = $settings['selectedForm'];
+    $formIntegrationSettings = ['isJobsBoardForm' => true];
+    update_post_meta( $formId, 'forminator_addon_dljb_form_settings', $formIntegrationSettings );
+  }
+
+  /**
    * Get the total number of job submission entries by status
    */
   public function getSubmissionCountByStatus($status){

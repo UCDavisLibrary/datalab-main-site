@@ -400,6 +400,7 @@ class UcdlibDatalabJobsBoardRest {
     if ( count($settings)  ) {
       $this->jobsBoard->updateAdminSettings( $settings );
     }
+    $this->jobsBoard->form->saveIntegrationSettings();
 
     // update user roles
     if ( isset($data['addBoardManagers']) && is_array($data['addBoardManagers']) ) {
