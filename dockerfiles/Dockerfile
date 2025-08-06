@@ -1,13 +1,13 @@
 # Multistage build args
-ARG WP_CORE_VERSION="6.8.1"
+ARG WP_CORE_VERSION="6.8.2"
 ARG REDIRECTION_ZIP_FILE="redirection-5.5.2.zip"
 ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-1.1.20.zip"
 ARG OPENID_CONNECT_GENERIC_DIR="openid-connect-generic-3.10.0"
 ARG OPENID_CONNECT_GENERIC_ZIP_FILE="${OPENID_CONNECT_GENERIC_DIR}.zip"
-ARG DEFENDER_PRO_ZIP_FILE="defender-pro-5.2.zip"
-ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-1.44.zip"
-ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.14.1.zip"
-ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.19.1.zip"
+ARG DEFENDER_PRO_ZIP_FILE="defender-pro-5.4.zip"
+ARG FORMINATOR_PRO_ZIP_FILE="forminator-pro-1.45.1.zip"
+ARG HUMMINGBIRD_PRO_ZIP_FILE="hummingbird-pro-3.15.zip"
+ARG SMUSH_PRO_ZIP_FILE="smush-pro-3.20.zip"
 ARG WPMU_DEV_DASHBOARD_ZIP_FILE="wpmu-dev-dashboard-4.11.29.zip"
 ARG BROKEN_LINK_CHECKER_ZIP_FILE="broken-link-checker-2.4.6.zip"
 ARG UCDLIB_THEME_WP_NODE_IMAGE
