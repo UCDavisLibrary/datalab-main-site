@@ -1,6 +1,6 @@
 x-variables:
-  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site:v1.3.1
-  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site-utils:v1.3.1
+  main-image: &main-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site:v1.3.2
+  utils-image: &utils-image us-west1-docker.pkg.dev/digital-ucdavis-edu/wordpress/datalab-main-site-utils:v1.3.2
 
 services:
   wordpress:
