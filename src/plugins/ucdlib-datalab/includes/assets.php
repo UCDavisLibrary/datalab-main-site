@@ -84,7 +84,7 @@ class UcdlibDatalabAssets {
     add_action('admin_enqueue_scripts', [$this, 'enqueuePublicScriptsInAdmin']);
     add_action('enqueue_block_editor_assets', [$this, 'enqueueEditorScripts'], 3);
     add_filter('ucd-theme/site/block-settings', [$this, 'modifyDefaultPostImgUrl'], 10, 1);
-    add_filter('ucd-theme/admin-variable/editor-script', [$this, 'updateEditorScriptVariable' ]);
+    add_action( 'enqueue_block_assets', array($this, "enqueue_block_assets") );
   }
 
   /**
@@ -96,6 +96,16 @@ class UcdlibDatalabAssets {
   }
 
   /**
+   * Add public assets to the block editor
+   */
+  public function enqueue_block_assets(){
+    if ( is_admin() ) {
+      $this->enqueuePublicScripts(true);
+      wp_deregister_script('ucd-editor-public', $this->plugin->config->slug . '-editor-public');
+    }
+  }
+
+  /**
    * Register and load public js bundle in certain admin screens
    * We code split the bundle so we only load what is needed
    */
@@ -103,15 +113,6 @@ class UcdlibDatalabAssets {
     if ( strpos($hook, $this->plugin->config->slug) === false ) return;
     $this->enqueuePublicScripts(true);
     $this->enqueueFonts();
-  }
-
-  public function updateEditorScriptVariable(){
-    $url = $this->jsEditorUrlDist;
-    if ( $this->plugin->config->isDevEnv() ){
-      $url = $this->jsEditorUrlDev;
-    }
-    $url .= '?v=' . $this->bundleVersion();
-    return $url;
   }
 
   /**
@@ -134,8 +135,10 @@ class UcdlibDatalabAssets {
   /**
    * Register and load public js/css assets
    */
-  public function enqueuePublicScripts($dontLoadStyles=false){
-    $slug = $this->plugin->config->slug;
+  public function enqueuePublicScripts($dontLoadStyles=false, $slug=null){
+    if ( empty($slug) ){
+      $slug = $this->plugin->config->slug;
+    }
     $pluginDir = $this->plugin->config->pluginUrl();
     $jsPath = $this->jsPublicUrlDist;
     $cssPath = $this->cssUrlDist;
