@@ -12,7 +12,8 @@ class UcdlibDatalabHackathonsModel extends UcdThemePost {
       return $this->children;
     }
     $mainClass = new UcdlibDatalabHackathons(null, false);
-    $this->children = parent::children($mainClass->slugs['hackathon']);
+    $children = parent::children($mainClass->slugs['hackathon']);
+    $this->children = empty($children) ? [] : $children;
     return $this->children;
   }
 

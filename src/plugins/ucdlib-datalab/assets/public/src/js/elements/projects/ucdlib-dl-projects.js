@@ -227,5 +227,6 @@ export default class UcdlibDlProjects extends LitElement {
     }
   }
 }
-
-customElements.define('ucdlib-dl-projects', UcdlibDlProjects);
+if ( !customElements.get('ucdlib-dl-projects') ){
+  customElements.define('ucdlib-dl-projects', UcdlibDlProjects);
+}

@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/hackathon-subnav';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Hackathon Subnav",
 	description: "Displays a subnav for a hierarchical hackathon/data challenge",
 	icon: UCDIcons.renderPublic('fa-folder-tree'),

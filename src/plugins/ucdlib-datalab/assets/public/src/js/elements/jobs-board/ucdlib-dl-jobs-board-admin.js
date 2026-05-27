@@ -767,4 +767,6 @@ export default class UcdlibDlJobsBoardAdmin extends LitElement {
   }
 }
 
-customElements.define('ucdlib-dl-jobs-board-admin', UcdlibDlJobsBoardAdmin);
+if ( !customElements.get('ucdlib-dl-jobs-board-admin') ){
+  customElements.define('ucdlib-dl-jobs-board-admin', UcdlibDlJobsBoardAdmin);
+}

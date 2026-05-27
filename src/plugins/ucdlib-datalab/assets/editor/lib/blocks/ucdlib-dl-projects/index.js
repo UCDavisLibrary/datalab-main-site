@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/projects';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Datalab Projects",
 	description: "A filterable list of datalab projects",
 	icon: UCDIcons.renderPublic('fa-folder-tree'),
