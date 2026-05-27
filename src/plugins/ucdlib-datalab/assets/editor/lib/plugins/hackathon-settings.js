@@ -27,7 +27,7 @@ const Edit = () => {
   if ( !isHackathon )  return html`<${Fragment} />`;
 
   // type taxonomy terms
-  const typeTerms = SelectUtils.terms('hackathon-type', {per_page: '-1', orderby: 'name', order: 'asc'});
+  const typeTerms = SelectUtils.terms('hackathon-type', {per_page: 100, orderby: 'name', order: 'asc'});
   const typeOptions = [
     {value: '', label: 'Select a type', disabled: true},
     ...typeTerms.map(l => {return {value: l.id, label: l.name}})

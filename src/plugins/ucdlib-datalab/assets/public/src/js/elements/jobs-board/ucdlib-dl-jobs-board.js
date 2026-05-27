@@ -246,4 +246,6 @@ export default class UcdlibDlJobsBoard extends LitElement {
 
 }
 
-customElements.define('ucdlib-dl-jobs-board', UcdlibDlJobsBoard);
+if ( !customElements.get('ucdlib-dl-jobs-board') ){
+  customElements.define('ucdlib-dl-jobs-board', UcdlibDlJobsBoard);
+}

@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/hackathons-current';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Current and Future Hackathons",
 	description: "A block for searching and displaying current and future hackathon/data challenge",
 	icon: UCDIcons.renderPublic('fa-code'),

@@ -199,5 +199,6 @@ export default class UcdlibDlHackathons extends LitElement {
   }
 
 }
-
-customElements.define('ucdlib-dl-hackathons', UcdlibDlHackathons);
+if ( !customElements.get('ucdlib-dl-hackathons') ){
+  customElements.define('ucdlib-dl-hackathons', UcdlibDlHackathons);
+}

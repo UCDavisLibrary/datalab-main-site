@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/project-partners';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Datalab Project Partners",
 	description: "Displays partners for a project.",
 	icon: UCDIcons.renderPublic('fa-handshake'),

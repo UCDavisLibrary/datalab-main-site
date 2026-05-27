@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/jobs-board';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Datalab Jobs Board",
 	description: "Displays interactive jobs board.",
 	icon: UCDIcons.renderPublic('fa-user-tie'),

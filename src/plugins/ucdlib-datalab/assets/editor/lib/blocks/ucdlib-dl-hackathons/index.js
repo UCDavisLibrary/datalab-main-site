@@ -3,7 +3,7 @@ import Edit from './edit';
 
 const name = 'ucdlib-datalab/hackathons';
 const settings = {
-  api_version: 2,
+  apiVersion: 3,
 	title: "Past Hackathon Search Block",
 	description: "A block for searching and displaying hackathon/data challenge",
 	icon: UCDIcons.renderPublic('fa-magnifying-glass'),
