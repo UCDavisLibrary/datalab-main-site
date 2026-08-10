@@ -1,5 +1,5 @@
 # Multistage build args
-ARG WP_CORE_VERSION="6.9.4"
+ARG WP_CORE_VERSION="7.0.2"
 ARG REDIRECTION_ZIP_FILE="redirection-5.7.5.zip"
 ARG SMTP_MAILER_ZIP_FILE="smtp-mailer-1.1.25.zip"
 ARG OPENID_CONNECT_GENERIC_DIR="openid-connect-generic-3.10.0"
